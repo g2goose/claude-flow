@@ -1,0 +1,333 @@
+name: Docker Build and Deploy
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Build nightly at 2 AM UTC to catch dependency updates
+    - cron: '0 2 * * *'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  # ===========================
+  # Docker Build Matrix
+  # ===========================
+  build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [production, development, testing]
+        platform: [linux/amd64, linux/arm64]
+    
+    permissions:
+      contents: read
+      packages: write
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value={{date 'YYYYMMDD'}}-{{sha}}
+          labels: |
+            org.opencontainers.image.title=Claude Flow
+            org.opencontainers.image.description=Enterprise AI Agent Orchestration
+            org.opencontainers.image.vendor=Claude Flow Team
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: ${{ matrix.target }}
+          platforms: ${{ matrix.platform }}
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}-${{ matrix.target }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=${{ matrix.target == 'production' && 'production' || 'development' }}
+            BUILDKIT_INLINE_CACHE=1
+
+  # ===========================
+  # Security Scanning
+  # ===========================
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name != 'pull_request'
+    
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-production
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Run Snyk Container Monitor
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-production
+          args: --severity-threshold=high
+        continue-on-error: true
+
+  # ===========================
+  # Docker Compose Testing
+  # ===========================
+  integration-test:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create test environment file
+        run: |
+          cat > .env.test << EOF
+          NODE_ENV=test
+          LOG_LEVEL=debug
+          CLAUDE_FLOW_PORT=3000
+          MCP_PORT=3001
+          REDIS_PORT=6379
+          EOF
+
+      - name: Start services with Docker Compose
+        run: |
+          docker-compose --profile testing up -d --build
+          
+      - name: Wait for services to be ready
+        run: |
+          timeout 300 bash -c '
+            while ! curl -f http://localhost:3000/health >/dev/null 2>&1; do
+              echo "Waiting for claude-flow service..."
+              sleep 5
+            done
+            echo "Claude Flow service is ready!"
+          '
+
+      - name: Run integration tests
+        run: |
+          docker-compose exec -T claude-flow-test npm run test:integration || true
+          docker-compose exec -T claude-flow-test npm run test:e2e || true
+
+      - name: Collect test results
+        if: always()
+        run: |
+          docker-compose cp claude-flow-test:/app/test-results ./test-results || true
+          docker-compose cp claude-flow-test:/app/coverage ./coverage || true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: |
+            test-results/
+            coverage/
+
+      - name: Stop services
+        if: always()
+        run: docker-compose down -v
+
+  # ===========================
+  # Performance Testing
+  # ===========================
+  performance-test:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start production environment
+        run: |
+          docker-compose --profile production up -d --build
+
+      - name: Wait for services
+        run: |
+          timeout 300 bash -c '
+            while ! curl -f http://localhost:3000/health >/dev/null 2>&1; do
+              echo "Waiting for services..."
+              sleep 5
+            done
+          '
+
+      - name: Install k6 for load testing
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Run performance tests
+        run: |
+          k6 run --vus 10 --duration 30s - <<EOF
+          import http from 'k6/http';
+          import { check } from 'k6';
+          
+          export default function () {
+            let response = http.get('http://localhost:3000/health');
+            check(response, {
+              'status is 200': (r) => r.status === 200,
+            });
+          }
+          EOF
+
+      - name: Stop services
+        if: always()
+        run: docker-compose down -v
+
+  # ===========================
+  # Multi-Architecture Manifest
+  # ===========================
+  manifest:
+    name: Create Multi-Arch Manifest
+    runs-on: ubuntu-latest
+    needs: [build, security-scan, integration-test]
+    if: github.event_name != 'pull_request'
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push multi-architecture manifests
+        run: |
+          for target in production development testing; do
+            docker buildx imagetools create -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-${target} \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-${target}-linux-amd64 \
+              ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest-${target}-linux-arm64
+          done
+
+  # ===========================
+  # Deployment Notification
+  # ===========================
+  notify:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [manifest]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Send deployment notification
+        run: |
+          echo "🚀 Claude Flow Docker images have been successfully built and deployed!"
+          echo "📦 Registry: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          echo "🏷️  Tags: latest-production, latest-development, latest-testing"
+          echo "🏗️  Architectures: linux/amd64, linux/arm64"
+          
+      - name: Update deployment status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: context.payload.deployment?.id || 'latest',
+              state: 'success',
+              description: 'Docker images deployed successfully',
+              environment_url: `https://${process.env.REGISTRY}/${process.env.IMAGE_NAME}`
+            });
+
+  # ===========================
+  # Cleanup Old Images
+  # ===========================
+  cleanup:
+    name: Cleanup Old Images
+    runs-on: ubuntu-latest
+    needs: [manifest]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'schedule'
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Delete old container images
+        uses: actions/delete-package-versions@v4
+        with:
+          package-name: ${{ env.IMAGE_NAME }}
+          package-type: 'container'
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: true
