@@ -83,7 +83,11 @@ export class SwarmMonitor extends EventEmitter {
 
   constructor(config?: Partial<MonitoringConfig>) {
     super();
-    this.logger = new Logger('SwarmMonitor');
+    this.logger = new Logger({
+      level: 'info',
+      format: 'text',
+      destination: 'console'
+    }, { prefix: 'SwarmMonitor' });
     this.config = {
       updateInterval: 1000, // 1 second
       metricsRetention: 24, // 24 hours

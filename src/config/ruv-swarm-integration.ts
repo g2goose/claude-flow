@@ -8,10 +8,14 @@
 
 import { configManager, ConfigManager } from './config-manager.js';
 import { getRuvSwarmConfigManager, RuvSwarmConfigManager } from './ruv-swarm-config.js';
-// import { createLogger } from '../core/logger.js';
+import { Logger } from '../core/logger.js';
 
 // Create logger for integration
-// const logger = createLogger('ruv-swarm-integration');
+const logger = new Logger({
+  level: 'info',
+  format: 'text',
+  destination: 'console'
+}, { prefix: 'RuvSwarmIntegration' });
 
 /**
  * Integration manager that synchronizes configurations
