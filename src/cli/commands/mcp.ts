@@ -86,10 +86,13 @@ export const mcpCommand = new Command()
         console.log(chalk.cyan('MCP Server Status:'));
         console.log(`🌐 Status: ${isRunning ? chalk.green('Running') : chalk.red('Stopped')}`);
 
-        if (isRunning) {
-          console.log(`📍 Address: ${config.mcp.host}:${config.mcp.port}`);
+        if (isRunning && config.mcp && typeof config.mcp === 'object') {
+          const host = 'host' in config.mcp ? config.mcp.host : 'localhost';
+          const port = 'port' in config.mcp ? config.mcp.port : 3000;
+          const auth = 'auth' in config.mcp ? config.mcp.auth : false;
+          console.log(`📍 Address: ${host}:${port}`);
           console.log(
-            `🔐 Authentication: ${config.mcp.auth ? chalk.green('Enabled') : chalk.yellow('Disabled')}`,
+            `🔐 Authentication: ${auth ? chalk.green('Enabled') : chalk.yellow('Disabled')}`,
           );
           console.log(`🔧 Tools: ${chalk.green('Available')}`);
           console.log(`📊 Metrics: ${chalk.green('Collecting')}`);

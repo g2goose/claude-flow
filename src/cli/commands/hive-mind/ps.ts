@@ -18,11 +18,10 @@ export const psCommand = new Command('ps')
     const sessionManager = new HiveMindSessionManager();
 
     try {
+      const sessionData = await sessionManager.getActiveSessionsWithProcessInfo();
       const sessions = options.all
-        ? sessionManager.getActiveSessionsWithProcessInfo()
-        : sessionManager
-            .getActiveSessionsWithProcessInfo()
-            .filter((s: any) => s.status === 'active' || s.status === 'paused');
+        ? sessionData
+        : sessionData.filter((s: any) => s.status === 'active' || s.status === 'paused');
 
       if (sessions.length === 0) {
         console.log(chalk.yellow('No sessions found'));
@@ -30,7 +29,7 @@ export const psCommand = new Command('ps')
       }
 
       // Clean up orphaned processes first
-      const cleanedCount = sessionManager.cleanupOrphanedProcesses();
+      const cleanedCount = await sessionManager.cleanupOrphanedProcesses();
       if (cleanedCount > 0) {
         console.log(chalk.blue(`Cleaned up ${cleanedCount} orphaned session(s)\n`));
       }
