@@ -22,6 +22,9 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+      # GITHUB_TOKEN should have minimal required permissions.
+      # It is recommended to use a token with only the necessary scopes for this application.
+      # For improved security, consider using Docker secrets or a secret management tool.
       - GITHUB_TOKEN=${GITHUB_TOKEN:-}
       - CLAUDE_FLOW_HOME=/home/claude/.claude-flow
       - MCP_SERVER_URL=http://mcp-server:3001
