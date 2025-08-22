@@ -38,6 +38,15 @@ class WorkflowIntegrationVerifier {
     console.log(`${levelColors[level]}[${timestamp}] ${message}${levelColors.reset}`);
   }
 
+  /**
+   * Verifies that workflow references and dependencies are present and correct.
+   * 
+   * This method checks all workflow files in the .github/workflows directory for
+   * references to the status-badges and rollback-manager workflows. It logs the
+   * results and updates the integration test results accordingly.
+   *
+   * @returns {Promise<boolean>} Resolves to true if verification succeeds, false otherwise.
+   */
   async verifyWorkflowReferences() {
     this.log('🔍 Verifying workflow references and dependencies...');
     
