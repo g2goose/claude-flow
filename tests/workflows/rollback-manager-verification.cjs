@@ -484,7 +484,18 @@ class RollbackManagerVerifier {
           pattern: /post-rollback.*verification/i,
           found: false
         }
+      const safetyMechanismNames = [
+        'Pre-rollback backup creation',
+        'Validation before execution',
+        'Emergency mode check',
+        'Force push with lease',
+        'Post-rollback verification'
       ];
+      const safetyMechanisms = safetyMechanismNames.map(name => ({
+        name,
+        pattern: RollbackManagerVerifier.SAFETY_MECHANISM_PATTERNS[name],
+        found: false
+      }));
 
       for (const mechanism of safetyMechanisms) {
         mechanism.found = mechanism.pattern.test(workflowContent);
