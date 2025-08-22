@@ -154,11 +154,26 @@ export const mcpCommand = new Command()
 
         console.log(chalk.yellow('🔄 Starting MCP server...'));
         const config = await configManager.load();
-        mcpServer = new MCPServer(config.mcp, eventBus, logger);
+        
+        // Ensure MCP config exists and has required properties
+        if (!config.mcp) {
+          console.error(chalk.red('❌ MCP configuration not found'));
+          process.exit(1);
+        }
+        
+        // Create a complete MCP config with defaults
+        const mcpConfig = {
+          enabled: true,
+          port: 3000,
+          host: 'localhost',
+          ...config.mcp
+        };
+        
+        mcpServer = new MCPServer(mcpConfig as any, eventBus, logger);
         await mcpServer.start();
 
         console.log(
-          chalk.green(`✅ MCP server restarted on ${config.mcp.host}:${config.mcp.port}`),
+          chalk.green(`✅ MCP server restarted on ${mcpConfig.host}:${mcpConfig.port}`),
         );
       } catch (error) {
         console.error(chalk.red(`❌ Failed to restart MCP server: ${(error as Error).message}`));
