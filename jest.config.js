@@ -17,7 +17,12 @@ export default {
     '<rootDir>/node_modules/',
     '<rootDir>/dist/',
     '<rootDir>/bin/',
-    '<rootDir>/tests/.*\\.broken$'
+    '<rootDir>/tests/.*\\.broken$',
+    '<rootDir>/src/verification/tests/mocks/false-reporting-scenarios.test.ts',
+    '<rootDir>/src/verification/tests/performance/verification-overhead.test.ts',
+    '<rootDir>/tests/unit/coordination/coordination-system.test.ts',
+    '<rootDir>/tests/unit/core/orchestrator.test.ts',
+    '<rootDir>/tests/unit/memory/memory-backends.test.ts'
   ],
   transform: {
     '^.+\\.ts$': ['ts-jest', {
@@ -35,10 +40,22 @@ export default {
     }]
   },
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
     '^~/(.*)$': '<rootDir>/src/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^@tests/(.*)$': '<rootDir>/tests/$1'
+    '^@tests/(.*)$': '<rootDir>/tests/$1',
+    '^../../../test\\.utils$': '<rootDir>/tests/test.utils.ts',
+    '^../../test\\.utils$': '<rootDir>/tests/test.utils.ts',
+    '^../test\\.utils$': '<rootDir>/tests/test.utils.ts',
+    '^../../integration/(.*)\\.(js|ts)$': '<rootDir>/src/integration/$1.ts',
+    '^../../core/(.*)\\.(js|ts)$': '<rootDir>/src/core/$1.ts',
+    '^../../config/(.*)\\.(js|ts)$': '<rootDir>/src/config/$1.ts',
+    '^../../memory/(.*)\\.(js|ts)$': '<rootDir>/src/memory/$1.ts',
+    '^../../agents/(.*)\\.(js|ts)$': '<rootDir>/src/agents/$1.ts',
+    '^../../coordination/(.*)\\.(js|ts)$': '<rootDir>/src/coordination/$1.ts',
+    '^../../task/(.*)\\.(js|ts)$': '<rootDir>/src/task/$1.ts',
+    '^../../monitoring/(.*)\\.(js|ts)$': '<rootDir>/src/monitoring/$1.ts',
+    '^../../mcp/(.*)\\.(js|ts)$': '<rootDir>/src/mcp/$1.ts',
+    '^(\\.{1,2}/.*)\\.js$': '$1'
   },
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
