@@ -176,7 +176,14 @@ push() {
     log "Pushing images to registry..."
     
     # Login to registry (assumes credentials are set)
-    echo "${REGISTRY_PASSWORD:-}" | docker login "${REGISTRY}" --username "${REGISTRY_USERNAME:-$(whoami)}" --password-stdin
+    # Validate registry password
+    if [[ -z "${REGISTRY_PASSWORD:-}" ]]; then
+        error "REGISTRY_PASSWORD is not set. Aborting push."
+        return 1
+    fi
+    
+    # Login to registry (assumes credentials are set)
+    echo "${REGISTRY_PASSWORD}" | docker login "${REGISTRY}" --username "${REGISTRY_USERNAME:-$(whoami)}" --password-stdin
     
     # Push all targets
     for target in production development testing; do
