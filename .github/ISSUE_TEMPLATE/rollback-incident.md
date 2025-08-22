@@ -9,7 +9,7 @@ assignees: []
 ## 🔄 Rollback Incident Details
 
 ### Incident Summary
-- **Incident Type:** 
+- **Incident Type:** <!-- Manual Rollback / Automated Rollback / Rollback Failure -->
 - **Severity:** <!-- Critical / High / Medium / Low -->
 - **Status:** <!-- Active / Investigating / Resolved -->
 - **Detected At:** <!-- YYYY-MM-DD HH:MM UTC -->
