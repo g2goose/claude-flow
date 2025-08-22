@@ -169,7 +169,7 @@ export const mcpCommand = new Command()
           ...config.mcp
         };
         
-        mcpServer = new MCPServer(mcpConfig as any, eventBus, logger);
+        mcpServer = new MCPServer(mcpConfig as MCPConfig, eventBus, logger);
         await mcpServer.start();
 
         console.log(
