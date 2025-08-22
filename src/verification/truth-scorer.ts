@@ -617,7 +617,7 @@ export class TruthScorer {
   }
 
   // Simulation methods for demo purposes - replace with real implementations
-  private simulatePeerValidation(claim: AgentClaim, peer: AgentState): number {
+  private simulatePeerValidation(_claim: AgentClaim, _peer: AgentState): number {
     // Simulate peer validation logic
     const baseScore = 0.7;
     const randomFactor = (Math.random() - 0.5) * 0.4;
@@ -642,7 +642,7 @@ export class TruthScorer {
     return Math.max(0, score);
   }
 
-  private checkCausalConsistency(claim: AgentClaim): number {
+  private checkCausalConsistency(_claim: AgentClaim): number {
     // Check for causal relationships in claim data
     return 0.8; // Simplified - implement actual causal analysis
   }
@@ -675,22 +675,22 @@ export class TruthScorer {
     return Math.max(0, score);
   }
 
-  private performDistributionTest(claim: AgentClaim): number {
+  private performDistributionTest(_claim: AgentClaim): number {
     // Perform statistical distribution test
     return 0.8; // Simplified - implement actual statistical tests
   }
 
-  private performOutlierDetection(claim: AgentClaim): number {
+  private performOutlierDetection(_claim: AgentClaim): number {
     // Detect outliers in claim metrics
     return 0.8; // Simplified - implement actual outlier detection
   }
 
-  private performTrendAnalysis(claim: AgentClaim): number {
+  private performTrendAnalysis(_claim: AgentClaim): number {
     // Analyze trends in claim data
     return 0.8; // Simplified - implement actual trend analysis
   }
 
-  private performCorrelationAnalysis(claim: AgentClaim): number {
+  private performCorrelationAnalysis(_claim: AgentClaim): number {
     // Analyze correlations in claim metrics
     return 0.8; // Simplified - implement actual correlation analysis
   }
