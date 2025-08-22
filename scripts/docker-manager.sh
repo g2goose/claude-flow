@@ -205,7 +205,30 @@ health() {
         if curl -f "http://localhost:${port}/health" >/dev/null 2>&1; then
             success "${name} is healthy"
         else
-            error "${name} is not responding"
+    # Service definitions: name:port:type
+    local services=("claude-flow:3000:http" "mcp-server:3001:http" "redis:6379:redis")
+    
+    for service in "${services[@]}"; do
+        IFS=':' read -r name port type <<< "${service}"
+        
+        if [[ "$type" == "http" ]]; then
+            if curl -f "http://localhost:${port}/health" >/dev/null 2>&1; then
+                success "${name} is healthy"
+            else
+                error "${name} is not responding"
+            fi
+        elif [[ "$type" == "redis" ]]; then
+            if command -v redis-cli >/dev/null 2>&1; then
+                if redis-cli -p "${port}" ping | grep -q PONG; then
+                    success "${name} is healthy"
+                else
+                    error "${name} is not responding"
+                fi
+            else
+                error "redis-cli not found; cannot check Redis health"
+            fi
+        else
+            error "Unknown service type for ${name}"
         fi
     done
 }
