@@ -611,6 +611,11 @@ npx claude-flow@alpha help <command>  # Detailed command help
 - [Architecture Overview](docs/ARCHITECTURE.md) - System design and internals
 - [Examples Directory](examples/) - Code examples and demos
 
+### Installation Guides
+- [🐧 Linux Installation Guide](docs/LINUX_INSTALL.md) - **Complete Linux setup and usage guide**
+- [🪟 Windows Installation](docs/windows-installation.md) - Special instructions for Windows users
+- [🐳 Docker Setup](Docker-Readme.md) - Container-based deployment
+
 ### New Features (v2.0.0)
 - [🔒 Git Checkpoint System](docs/GIT_CHECKPOINT_HOOKS.md) - Automatic Git checkpoints for Claude Code sessions
 - [📊 Real Performance Tracking](docs/REAL_PERFORMANCE_TRACKING.md) - Actual metrics collection and analysis
