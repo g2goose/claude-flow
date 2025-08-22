@@ -138,7 +138,26 @@ function createIssueWithCLI(issue) {
   }
   
   try {
-    const output = execSync(command, { encoding: 'utf-8' });
+  const args = [
+    'issue', 'create',
+    '--repo', `${REPO_OWNER}/${REPO_NAME}`,
+    '--title', issue.title,
+    '--body', issue.body,
+  ];
+  if (issue.labels.length > 0) {
+    args.push('--label', issue.labels.join(','));
+  }
+  if (issue.assignees.length > 0) {
+    args.push('--assignee', issue.assignees.join(','));
+  }
+
+  if (isDryRun) {
+    console.log(`Would execute: gh ${args.map(a => JSON.stringify(a)).join(' ')}`);
+    return { success: true, url: `https://github.com/${REPO_OWNER}/${REPO_NAME}/issues/new` };
+  }
+
+  try {
+    const output = execFileSync('gh', args, { encoding: 'utf-8' });
     const urlMatch = output.match(/https:\/\/github\.com\/[^\s]+/);
     return { 
       success: true, 
