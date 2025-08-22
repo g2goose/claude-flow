@@ -46,6 +46,62 @@ fi
 echo "✅ Prerequisites checked"
 echo ""
 
+# Function to create or ensure label exists
+ensure_label() {
+    local label="$1"
+    local color="$2"
+    local description="$3"
+    
+    if [[ "$DRY_RUN" == "true" ]]; then
+        return 0
+    fi
+    
+    # Check if label exists (suppress error output)
+    if gh label list --repo "$REPO" --limit 100 2>/dev/null | grep -q "^$label"; then
+        return 0
+    fi
+    
+    # Try to create the label
+    echo "📋 Creating missing label: $label"
+    if gh label create "$label" --color "$color" --description "$description" --repo "$REPO" 2>/dev/null; then
+        echo "✅ Created label: $label"
+    else
+        echo "⚠️  Could not create label: $label (may already exist or insufficient permissions)"
+    fi
+}
+
+# Function to create standard labels
+create_standard_labels() {
+    if [[ "$DRY_RUN" == "true" ]]; then
+        echo "Would create standard labels if missing"
+        return 0
+    fi
+    
+    echo "🏷️  Ensuring standard labels exist..."
+    
+    # Priority labels
+    ensure_label "high-priority" "d73a4a" "High priority issues that need immediate attention"
+    ensure_label "medium-priority" "fbca04" "Medium priority issues"
+    ensure_label "low-priority" "0e8a16" "Low priority issues"
+    
+    # Type labels  
+    ensure_label "bug" "d73a4a" "Something isn't working"
+    ensure_label "enhancement" "a2eeef" "New feature or request"
+    
+    # Category labels
+    ensure_label "ci/cd" "1d76db" "Continuous Integration/Deployment related"
+    ensure_label "typescript" "007acc" "TypeScript related issues"
+    ensure_label "testing" "c5def5" "Testing related issues"
+    ensure_label "verification" "5319e7" "Verification system related"
+    ensure_label "truth-scoring" "b60205" "Truth scoring pipeline related"
+    ensure_label "infrastructure" "0052cc" "Infrastructure and setup related"
+    ensure_label "docker" "2188ff" "Docker related issues"
+    ensure_label "build" "f9d0c4" "Build system related"
+    ensure_label "workflows" "e99695" "GitHub workflows related"
+    
+    echo ""
+}
+
 # Function to create issue
 create_issue() {
     local title="$1"
@@ -62,23 +118,46 @@ create_issue() {
         return
     fi
     
-    # Create the issue
+    echo ""
+    echo "Creating issue in $REPO"
+    
+    # Try to create the issue with labels first
     if [[ -n "$labels" ]]; then
-        gh issue create \
+        if gh issue create \
             --repo "$REPO" \
             --title "$title" \
             --body-file "$body_file" \
             --label "$labels" \
-            --assignee "$ASSIGNEE"
+            --assignee "$ASSIGNEE" 2>/dev/null; then
+            echo "✅ Created issue: $title (with labels: $labels)"
+        else
+            echo "⚠️  Failed to create issue with labels, trying without labels..."
+            # Fallback: create without labels
+            if gh issue create \
+                --repo "$REPO" \
+                --title "$title" \
+                --body-file "$body_file" \
+                --assignee "$ASSIGNEE"; then
+                echo "✅ Created issue: $title (without labels due to label restrictions)"
+            else
+                echo "❌ Failed to create issue: $title"
+                return 1
+            fi
+        fi
     else
-        gh issue create \
+        # Create without labels
+        if gh issue create \
             --repo "$REPO" \
             --title "$title" \
             --body-file "$body_file" \
-            --assignee "$ASSIGNEE"
+            --assignee "$ASSIGNEE"; then
+            echo "✅ Created issue: $title"
+        else
+            echo "❌ Failed to create issue: $title"
+            return 1
+        fi
     fi
     
-    echo "✅ Created issue: $title"
     echo ""
     
     # Rate limiting
@@ -223,6 +302,9 @@ These workflows may be working but need verification:
 4. Update if necessary based on main workflow fixes
 EOF
 
+# Create standard labels before creating issues
+create_standard_labels
+
 echo "📋 Creating GitHub Issues..."
 echo ""
 
@@ -257,4 +339,17 @@ if [[ "$DRY_RUN" == "true" ]]; then
     echo ""
     echo "To actually create the issues, run:"
     echo "  ./scripts/create-github-issues.sh"
+    echo ""
+    echo "Or use npm scripts:"
+    echo "  npm run create-issues:bash"
+else
+    echo ""
+    echo "✨ GitHub issue creation completed!"
+    echo ""
+    echo "📊 Next steps:"
+    echo "  1. Visit https://github.com/$REPO/issues to view created issues"
+    echo "  2. Verify that all issues are assigned to @$ASSIGNEE"
+    echo "  3. Check that labels were applied correctly"
+    echo ""
+    echo "🎯 All workflow failure issues have been documented and assigned!"
 fi
