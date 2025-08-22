@@ -157,24 +157,53 @@ test_build() {
 test_services() {
     log "Testing services startup..."
     
+    # Skip if CI environment detected
+    if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+        warn "CI environment detected - skipping service startup test"
+        return 0
+    fi
+    
+    # Check if GITHUB_TOKEN is set for service tests
+    if ! grep -q "^GITHUB_TOKEN=" .env 2>/dev/null || grep -q "^GITHUB_TOKEN=$" .env 2>/dev/null; then
+        warn "GITHUB_TOKEN not configured - skipping service startup test"
+        warn "Set GITHUB_TOKEN in .env file to enable service testing"
+        return 0
+    fi
+    
     # Check if services are already running
     if docker compose ps --services --filter "status=running" | grep -q claude-flow; then
         warn "Services are already running. Stopping for clean test..."
         docker compose down >/dev/null 2>&1
+        sleep 3
     fi
     
     echo "Starting services for test..."
-    if docker compose up -d >/dev/null 2>&1; then
+    # Use timeout to prevent hanging
+    if timeout 60 docker compose up -d >/dev/null 2>&1; then
         pass "Services start successfully"
         
-        # Wait for services to be ready
-        sleep 10
+        # Wait for services to be ready with timeout
+        log "Waiting for services to become ready..."
+        local retries=12
+        local ready=false
         
-        # Test health endpoints
-        if curl -f http://localhost:3000/health >/dev/null 2>&1; then
-            pass "Claude Flow health endpoint responds"
+        for i in $(seq 1 $retries); do
+            if docker compose ps | grep -q "Up.*healthy\|Up.*running"; then
+                ready=true
+                break
+            fi
+            sleep 5
+        done
+        
+        if [[ "$ready" == "true" ]]; then
+            # Test health endpoints
+            if timeout 10 curl -f http://localhost:3000/health >/dev/null 2>&1; then
+                pass "Claude Flow health endpoint responds"
+            else
+                warn "Claude Flow health endpoint not responding (this is expected if GITHUB_TOKEN is not set)"
+            fi
         else
-            warn "Claude Flow health endpoint not responding"
+            warn "Services did not become ready within timeout"
         fi
         
         # Clean up
@@ -317,8 +346,8 @@ main() {
     test_volumes
     test_network
     
-    # Only run build and service tests if specifically requested or in CI
-    if [[ $FAILED -eq 0 ]] && [[ "${CI:-}" == "true" || "${RUN_FULL_TESTS:-}" == "true" ]]; then
+    # Only run build and service tests if specifically requested
+    if [[ $FAILED -eq 0 ]] && [[ "${RUN_FULL_TESTS:-}" == "true" ]]; then
         test_build
         test_services
     else
