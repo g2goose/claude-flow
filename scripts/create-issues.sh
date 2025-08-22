@@ -67,7 +67,9 @@ echo ""
 # Confirmation prompt
 read -p "Do you want to proceed with creating the issues? (y/N): " -n 1 -r
 echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+read -r -p "Do you want to proceed with creating the issues? (y/N): " REPLY
+echo
+if [[ ! "${REPLY}" =~ ^[Yy] ]]; then
     echo "❌ Cancelled by user"
     exit 0
 fi
