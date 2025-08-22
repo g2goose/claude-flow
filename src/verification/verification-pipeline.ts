@@ -667,7 +667,7 @@ export class VerificationPipeline {
 
   private async executeStateValidationValidator(
     validator: CheckpointValidator,
-    context: VerificationContext
+    _context: VerificationContext
   ): Promise<ValidatorResult> {
     // Validate current system state
     const validationScore = 0.85; // Simplified - implement actual state validation
@@ -696,7 +696,7 @@ export class VerificationPipeline {
 
   private async executeCustomValidator(
     validator: CheckpointValidator,
-    context: VerificationContext
+    _context: VerificationContext
   ): Promise<ValidatorResult> {
     // Implement custom validator logic based on config
     const customScore = 0.8; // Simplified - implement actual custom validation

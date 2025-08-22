@@ -3,7 +3,7 @@
 <div align="center">
 
 [![🌟 Star on GitHub](https://img.shields.io/github/stars/ruvnet/claude-flow?style=for-the-badge&logo=github&color=gold)](https://github.com/ruvnet/claude-flow)
-[![📦 Alpha Release](https://img.shields.io/npm/v/claude-flow/alpha?style=for-the-badge&logo=npm&color=orange&label=v2.0.0-alpha.53)](https://www.npmjs.com/package/claude-flow/v/alpha)
+[![📦 Alpha Release](https://img.shields.io/npm/v/claude-flow/alpha?style=for-the-badge&logo=npm&color=orange&label=v2.0.0-alpha.90)](https://www.npmjs.com/package/claude-flow/v/alpha)
 [![⚡ Claude Code](https://img.shields.io/badge/Claude%20Code-Optimized-green?style=for-the-badge&logo=anthropic)](https://github.com/ruvnet/claude-flow)
 [![🏛️ Agentics Foundation](https://img.shields.io/badge/Agentics-Foundation-crimson?style=for-the-badge&logo=openai)](https://discord.com/invite/dfxmpwkG2D)
 [![🐝 Hive-Mind](https://img.shields.io/badge/Hive--Mind-AI%20Coordination-purple?style=for-the-badge&logo=swarm)](https://github.com/ruvnet/claude-flow)
@@ -569,7 +569,7 @@ npm install -g claude-flow@alpha
 npx claude-flow@alpha init --force
 
 # Verify installation
-claude-flow --version  # Should show 2.0.0-alpha.53
+claude-flow --version  # Should show 2.0.0-alpha.90
 ```
 
 ### **🔧 Enhanced Configuration**

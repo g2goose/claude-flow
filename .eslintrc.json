@@ -30,6 +30,8 @@
     "dist/",
     "node_modules/",
     "coverage/",
-    "*.js"
+    "*.js",
+    "src/verification/tests/**/*",
+    "tests/**/*"
   ]
 }
