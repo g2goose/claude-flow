@@ -44,8 +44,8 @@ check_prerequisites() {
         exit 1
     fi
     
-    if ! command -v docker-compose &> /dev/null; then
-        error "Docker Compose is not installed or not in PATH"
+    if ! docker compose version &> /dev/null; then
+        error "Docker Compose is not installed or Docker Compose plugin is missing"
         exit 1
     fi
     
@@ -87,12 +87,12 @@ build_all() {
 dev() {
     log "Starting development environment..."
     
-    docker-compose --profile development up -d --build
+    docker compose --profile development up -d --build
     
     log "Development environment started. Services:"
-    docker-compose ps
+    docker compose ps
     
-    log "Logs can be viewed with: docker-compose logs -f"
+    log "Logs can be viewed with: docker compose logs -f"
     log "Access the application at: http://localhost:3000"
 }
 
@@ -104,11 +104,11 @@ test() {
     build_images "testing"
     
     # Run tests
-    docker-compose --profile testing up --build --abort-on-container-exit
+    docker compose --profile testing up --build --abort-on-container-exit
     
     # Collect results
-    docker-compose cp claude-flow-test:/app/test-results ./test-results 2>/dev/null || true
-    docker-compose cp claude-flow-test:/app/coverage ./coverage 2>/dev/null || true
+    docker compose cp claude-flow-test:/app/test-results ./test-results 2>/dev/null || true
+    docker compose cp claude-flow-test:/app/coverage ./coverage 2>/dev/null || true
     
     success "Tests completed. Results available in ./test-results and ./coverage"
 }
@@ -121,10 +121,10 @@ prod() {
     build_images "production"
     
     # Start production services
-    docker-compose --profile production up -d --build
+    docker compose --profile production up -d --build
     
     log "Production environment started. Services:"
-    docker-compose --profile production ps
+    docker compose --profile production ps
     
     log "Health check: curl http://localhost:3000/health"
 }
@@ -155,7 +155,7 @@ cleanup() {
     log "Cleaning up Docker resources..."
     
     # Stop all containers
-    docker-compose down -v --remove-orphans 2>/dev/null || true
+    docker compose down -v --remove-orphans 2>/dev/null || true
     
     # Remove unused images
     docker image prune -f
@@ -197,14 +197,6 @@ push() {
 health() {
     log "Performing health check..."
     
-    local services=("claude-flow:3000" "mcp-server:3001" "redis:6379")
-    
-    for service in "${services[@]}"; do
-        IFS=':' read -r name port <<< "${service}"
-        
-        if curl -f "http://localhost:${port}/health" >/dev/null 2>&1; then
-            success "${name} is healthy"
-        else
     # Service definitions: name:port:type
     local services=("claude-flow:3000:http" "mcp-server:3001:http" "redis:6379:redis")
     
@@ -237,13 +229,13 @@ health() {
 monitoring() {
     log "Starting monitoring stack..."
     
-    docker-compose --profile monitoring up -d --build
+    docker compose --profile monitoring up -d --build
     
     log "Monitoring services started:"
     log "- Prometheus: http://localhost:9090"
     log "- Grafana: http://localhost:3001 (admin/admin)"
     
-    docker-compose --profile monitoring ps
+    docker compose --profile monitoring ps
 }
 
 # Logs
@@ -251,16 +243,16 @@ logs() {
     local service=${1:-}
     
     if [[ -n "${service}" ]]; then
-        docker-compose logs -f "${service}"
+        docker compose logs -f "${service}"
     else
-        docker-compose logs -f
+        docker compose logs -f
     fi
 }
 
 # Status
 status() {
     log "Docker Compose services status:"
-    docker-compose ps
+    docker compose ps
     
     log "\nDocker images:"
     docker images | grep "${PROJECT_NAME}" || echo "No Claude Flow images found"
