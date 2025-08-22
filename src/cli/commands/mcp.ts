@@ -86,10 +86,13 @@ export const mcpCommand = new Command()
         console.log(chalk.cyan('MCP Server Status:'));
         console.log(`🌐 Status: ${isRunning ? chalk.green('Running') : chalk.red('Stopped')}`);
 
-        if (isRunning) {
-          console.log(`📍 Address: ${config.mcp.host}:${config.mcp.port}`);
+        if (isRunning && config.mcp && typeof config.mcp === 'object') {
+          const host = 'host' in config.mcp ? config.mcp.host : 'localhost';
+          const port = 'port' in config.mcp ? config.mcp.port : 3000;
+          const auth = 'auth' in config.mcp ? config.mcp.auth : false;
+          console.log(`📍 Address: ${host}:${port}`);
           console.log(
-            `🔐 Authentication: ${config.mcp.auth ? chalk.green('Enabled') : chalk.yellow('Disabled')}`,
+            `🔐 Authentication: ${auth ? chalk.green('Enabled') : chalk.yellow('Disabled')}`,
           );
           console.log(`🔧 Tools: ${chalk.green('Available')}`);
           console.log(`📊 Metrics: ${chalk.green('Collecting')}`);
@@ -151,11 +154,26 @@ export const mcpCommand = new Command()
 
         console.log(chalk.yellow('🔄 Starting MCP server...'));
         const config = await configManager.load();
-        mcpServer = new MCPServer(config.mcp, eventBus, logger);
+        
+        // Ensure MCP config exists and has required properties
+        if (!config.mcp) {
+          console.error(chalk.red('❌ MCP configuration not found'));
+          process.exit(1);
+        }
+        
+        // Create a complete MCP config with defaults
+        const mcpConfig = {
+          enabled: true,
+          port: 3000,
+          host: 'localhost',
+          ...config.mcp
+        };
+        
+        mcpServer = new MCPServer(mcpConfig as MCPConfig, eventBus, logger);
         await mcpServer.start();
 
         console.log(
-          chalk.green(`✅ MCP server restarted on ${config.mcp.host}:${config.mcp.port}`),
+          chalk.green(`✅ MCP server restarted on ${mcpConfig.host}:${mcpConfig.port}`),
         );
       } catch (error) {
         console.error(chalk.red(`❌ Failed to restart MCP server: ${(error as Error).message}`));

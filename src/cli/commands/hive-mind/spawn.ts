@@ -54,9 +54,9 @@ const CAPABILITY_MAP: Record<AgentType, AgentCapability[]> = {
   'system-architect': ['system_design', 'architecture_patterns', 'integration_planning'],
   task_planner: ['task_management', 'workflow_orchestration'],
   'task-planner': ['task_management', 'workflow_orchestration'],
-  implementation_coder: ['code_generation', 'implementation', 'debugging'],
-  developer: ['code_generation', 'implementation', 'debugging'],
-  quality_reviewer: ['code_review', 'quality_assurance', 'testing'],
+  implementation_coder: ['code_generation', 'refactoring', 'debugging'],
+  developer: ['code_generation', 'refactoring', 'debugging'],
+  'quality-reviewer': ['code_review', 'quality_assurance', 'test_generation'],
   steering_documenter: ['documentation_generation', 'governance']
 };
 

@@ -21,7 +21,8 @@ export type { AgentState } from './base-agent.js';
 export type { CapabilityMatch, TaskRequirements, CapabilityRegistry } from './capabilities.js';
 
 // Agent Factory
-import type { AgentType, AgentConfig, AgentEnvironment } from '../../swarm/types.js';
+import type { AgentType } from '../../constants/agent-types.js';
+import type { AgentConfig, AgentEnvironment } from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
@@ -214,8 +215,7 @@ export class AgentFactory {
     return [
       'researcher', 'coder', 'analyst', 'architect', 'tester', 'coordinator',
       'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist',
-      'requirements_analyst', 'design_architect', 'task_planner', 
-      'implementation_coder', 'quality_reviewer', 'steering_documenter'
+      'specification', 'architecture', 'pseudocode', 'refinement' 
     ];
   }
 
@@ -235,15 +235,11 @@ export class AgentFactory {
       documenter: 'Creates and maintains comprehensive documentation',
       monitor: 'Monitors system health and performance metrics',
       specialist: 'Provides domain-specific expertise and specialized knowledge',
-      requirements_analyst: 'Analyzes requirements and creates user stories with acceptance criteria',
-      design_architect: 'Creates technical designs and system architecture for features',
-      'system-architect': 'High-level system architecture and design patterns',
-      task_planner: 'Plans implementation tasks and orchestrates workflow execution', 
-      'task-planner': 'Plans implementation tasks and orchestrates workflow execution',
-      implementation_coder: 'Implements code based on designs with quality focus',
-      developer: 'General purpose software development and implementation',
-      quality_reviewer: 'Reviews code quality and ensures standards compliance',
-      steering_documenter: 'Maintains governance documentation and project steering'
+      specification: 'SPARC: Analyzes requirements and creates technical specifications',
+      architecture: 'SPARC: Creates technical designs and system architecture',
+      pseudocode: 'SPARC: Creates pseudocode and algorithm designs',
+      refinement: 'SPARC: Refines and optimizes designs for implementation',
+      refinement: 'SPARC: Refines and optimizes designs for implementation'
     };
   }
 

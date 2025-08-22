@@ -114,7 +114,7 @@ export class MaestroSwarmCoordinator extends EventEmitter {
   }
   
   /**
-   * Create specification using native requirements_analyst agent
+   * Create specification using native agents with requirements analysis capabilities
    */
   async createSpec(featureName: string, initialRequest: string): Promise<void> {
     const featurePath = join(this.specsDirectory, featureName);

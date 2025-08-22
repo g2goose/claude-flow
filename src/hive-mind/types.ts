@@ -23,7 +23,7 @@ export interface HiveMindConfig {
   createdAt?: Date;
 }
 
-// Agent types
+// Agent types - compatible with dynamic agent loading
 export type AgentType =
   | 'coordinator'
   | 'researcher'
@@ -36,13 +36,13 @@ export type AgentType =
   | 'documenter'
   | 'monitor'
   | 'specialist'
-  // Maestro specs-driven agent types
-  | 'requirements_analyst'
-  | 'design_architect'
-  | 'task_planner'
-  | 'implementation_coder'
-  | 'quality_reviewer'
-  | 'steering_documenter';
+  // SPARC methodology agents (using actual agent names from .claude/agents/)
+  | 'specification'  // SPARC specification phase
+  | 'pseudocode'     // SPARC pseudocode phase  
+  | 'architecture'   // SPARC architecture phase
+  | 'refinement'     // SPARC refinement phase
+  // Additional dynamic agent types - compatible with any string
+  | string;
 
 export type AgentStatus = 'idle' | 'busy' | 'active' | 'error' | 'offline';
 

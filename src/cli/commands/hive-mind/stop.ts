@@ -126,7 +126,7 @@ export const stopCommand = new Command('stop')
       }
 
       // Clean up orphaned processes
-      const cleanedCount = sessionManager.cleanupOrphanedProcesses();
+      const cleanedCount = await sessionManager.cleanupOrphanedProcesses();
       if (cleanedCount > 0) {
         console.log(chalk.blue(`\nCleaned up ${cleanedCount} orphaned session(s)`));
       }
