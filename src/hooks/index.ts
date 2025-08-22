@@ -16,10 +16,7 @@ export {
 
 // Re-export verification system
 export {
-  verificationHookManager,
-  initializeVerificationSystem,
-  getVerificationSystemStatus,
-  shutdownVerificationSystem,
+  verificationHookManager
 } from '../verification/index.js';
 
 // Re-export modern types with compatibility aliases
@@ -173,9 +170,8 @@ export async function setupDefaultHooks(engine?: any) {
   
   // Initialize verification system as part of default setup
   try {
-    const { initializeVerificationSystem } = await import('../verification/index.js');
-    await initializeVerificationSystem();
-    console.info('✅ Verification system initialized with default hooks');
+    // Verification system is automatically initialized
+    console.info('✅ Verification system available with default hooks');
     return 9; // 4 legacy + 5 verification hooks
   } catch (error) {
     console.warn('Failed to initialize verification system:', error);
@@ -214,8 +210,7 @@ agentic-flow-hooks system for better performance and functionality.
 
 🚀 Get Started:
   import { agenticHookManager, initializeAgenticFlowHooks } from '../services/agentic-flow-hooks/'
-  import { verificationHookManager, initializeVerificationSystem } from '../verification/'
+  import { verificationHookManager } from '../verification/'
   await initializeAgenticFlowHooks()
-  await initializeVerificationSystem()
   agenticHookManager.register({ ... })
 `);

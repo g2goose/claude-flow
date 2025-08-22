@@ -238,7 +238,6 @@ export class AgentFactory {
       specification: 'SPARC: Analyzes requirements and creates technical specifications',
       architecture: 'SPARC: Creates technical designs and system architecture',
       pseudocode: 'SPARC: Creates pseudocode and algorithm designs',
-      refinement: 'SPARC: Refines and optimizes designs for implementation',
       refinement: 'SPARC: Refines and optimizes designs for implementation'
     };
   }

@@ -8,6 +8,7 @@ import { logger } from '../../core/logger.js';
 import { configManager } from '../../core/config.js';
 import { MCPServer } from '../../mcp/server.js';
 import { eventBus } from '../../core/event-bus.js';
+import type { MCPConfig } from '../../utils/types.js';
 
 let mcpServer: MCPServer | null = null;
 
@@ -162,14 +163,15 @@ export const mcpCommand = new Command()
         }
         
         // Create a complete MCP config with defaults
-        const mcpConfig = {
-          enabled: true,
+        const mcpConfig: MCPConfig = {
+          transport: 'http',
           port: 3000,
           host: 'localhost',
+          enableMetrics: true,
           ...config.mcp
         };
         
-        mcpServer = new MCPServer(mcpConfig as MCPConfig, eventBus, logger);
+        mcpServer = new MCPServer(mcpConfig, eventBus, logger);
         await mcpServer.start();
 
         console.log(
