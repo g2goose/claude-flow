@@ -327,32 +327,46 @@ docker volume prune -f
    docker compose ps
    ```
 
-#### Using Windows Batch Scripts
+### Quick Windows Batch Files
 
-Create helper batch files for common operations:
+For Windows users, we provide convenient batch files for common operations:
 
 **start-claude-flow.bat:**
-```batch
-@echo off
-echo Starting Claude Flow...
-docker compose up -d
-docker compose ps
-pause
-```
+- Starts Claude Flow in production mode
+- Shows service status
+- Displays access URL
 
 **stop-claude-flow.bat:**
-```batch
-@echo off
-echo Stopping Claude Flow...
-docker compose down
-pause
-```
+- Stops all Claude Flow services
+- Confirms shutdown
 
 **logs-claude-flow.bat:**
+- Shows real-time logs from Claude Flow service
+- Press Ctrl+C to exit
+
+#### Usage
+```cmd
+# Start Claude Flow
+start-claude-flow.bat
+
+# View logs in another terminal
+logs-claude-flow.bat
+
+# Stop when done
+stop-claude-flow.bat
+```
+
+**Create custom batch files:**
+
+You can create additional custom batch files as needed:
+
+**dev-claude-flow.bat:**
 ```batch
 @echo off
-echo Claude Flow Logs:
-docker compose logs -f claude-flow
+echo Starting Claude Flow Development Environment...
+docker compose --profile development up -d
+docker compose ps
+pause
 ```
 
 ### Windows-Specific Considerations
