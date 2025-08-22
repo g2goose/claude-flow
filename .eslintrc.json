@@ -32,6 +32,6 @@
     "coverage/",
     "*.js",
     "src/verification/tests/**/*",
-    "tests/**/*"
+    "tests/**/*.broken"
   ]
 }

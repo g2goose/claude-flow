@@ -13,6 +13,14 @@ const originalConsole = { ...console };
 // Store original console for restoration
 global.originalConsole = originalConsole;
 
+// Mock Logger configuration for tests
+global.mockLoggerConfig = {
+  level: 'error', // Only log errors during tests
+  format: 'json',
+  destination: 'console',
+  silent: true
+};
+
 // Handle unhandled rejections in tests
 process.on('unhandledRejection', (reason, promise) => {
   // Only log in test environment if needed
