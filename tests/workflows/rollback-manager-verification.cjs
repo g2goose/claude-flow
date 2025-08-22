@@ -32,6 +32,35 @@ class RollbackManagerVerifier {
     console.log(`${levelColors[level]}[${timestamp}] ${message}${levelColors.reset}`);
   }
 
+  /**
+   * Verifies the structure and required components of the rollback-manager.yml workflow file.
+   *
+   * Workflow file requirements:
+   * - Must exist at the path: .github/workflows/rollback-manager.yml
+   * - Must contain the following required sections:
+   *   - name: 🔄 Automated Rollback Manager
+   *   - on:
+   *   - workflow_run:
+   *   - workflow_dispatch:
+   *   - jobs:
+   *   - failure-detection:
+   *   - pre-rollback-validation:
+   *   - execute-rollback:
+   *   - post-rollback-verification:
+   * - Should define the following environment variables:
+   *   - NODE_VERSION
+   *   - ROLLBACK_RETENTION_DAYS
+   *   - CRITICAL_FAILURE_THRESHOLD
+   *   - MONITORING_WINDOW_MINUTES
+   *
+   * Validation criteria:
+   * - Checks for existence of the workflow file.
+   * - Ensures all required sections are present.
+   * - Warns if any expected environment variables are missing.
+   * - Records results and errors for reporting.
+   *
+   * @returns {Promise<boolean>} True if verification passes, false otherwise.
+   */
   async verifyWorkflowFile() {
     this.log('🔍 Verifying rollback-manager.yml workflow file...');
     
