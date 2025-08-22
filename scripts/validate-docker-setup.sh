@@ -133,7 +133,6 @@ test_dockerfile() {
 }
 
 # Test build process
-# Test build process
 test_build() {
     log "Testing Docker build process..."
     
