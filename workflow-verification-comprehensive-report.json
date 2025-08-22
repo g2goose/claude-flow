@@ -1,0 +1,202 @@
+{
+  "timestamp": "2025-08-22T12:26:52.543Z",
+  "duration": {
+    "minutes": 0,
+    "seconds": 0.1
+  },
+  "summary": {
+    "totalTests": 18,
+    "totalPassed": 17,
+    "totalFailed": 0,
+    "totalWarnings": 1,
+    "overallStatus": "PASS"
+  },
+  "sections": {
+    "statusBadges": {
+      "timestamp": "2025-08-22T12:26:52.467Z",
+      "summary": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "warnings": 0
+      },
+      "results": [
+        {
+          "test": "Workflow file structure",
+          "status": "pass"
+        },
+        {
+          "test": "README badge section",
+          "status": "pass"
+        },
+        {
+          "test": "Badge generation simulation",
+          "status": "pass"
+        },
+        {
+          "test": "Badge update logic",
+          "status": "pass"
+        },
+        {
+          "test": "Workflow triggers",
+          "status": "pass"
+        },
+        {
+          "test": "YAML syntax",
+          "status": "pass"
+        }
+      ],
+      "errors": [],
+      "overall": "PASS"
+    },
+    "rollbackManager": {
+      "timestamp": "2025-08-22T12:26:52.529Z",
+      "summary": {
+        "total": 9,
+        "passed": 9,
+        "failed": 0,
+        "warnings": 0
+      },
+      "results": [
+        {
+          "test": "Workflow file structure",
+          "status": "pass"
+        },
+        {
+          "test": "Job dependencies",
+          "status": "pass"
+        },
+        {
+          "test": "Workflow inputs",
+          "status": "pass"
+        },
+        {
+          "test": "Failure detection simulation",
+          "status": "pass"
+        },
+        {
+          "test": "Git operations",
+          "status": "pass"
+        },
+        {
+          "test": "Rollback validation",
+          "status": "pass"
+        },
+        {
+          "test": "Environment configuration",
+          "status": "pass"
+        },
+        {
+          "test": "Safety mechanisms",
+          "status": "pass",
+          "details": [
+            {
+              "name": "Pre-rollback backup creation",
+              "pattern": {},
+              "found": true
+            },
+            {
+              "name": "Validation before execution",
+              "pattern": {},
+              "found": true
+            },
+            {
+              "name": "Emergency mode check",
+              "pattern": {},
+              "found": true
+            },
+            {
+              "name": "Force push with lease",
+              "pattern": {},
+              "found": true
+            },
+            {
+              "name": "Post-rollback verification",
+              "pattern": {},
+              "found": true
+            }
+          ]
+        },
+        {
+          "test": "Rollback scenarios",
+          "status": "pass"
+        }
+      ],
+      "errors": [],
+      "warnings": [],
+      "overall": "PASS"
+    },
+    "integration": [
+      {
+        "test": "Workflow references",
+        "status": "pass",
+        "statusBadgesRefs": [
+          "status-badges.yml"
+        ],
+        "rollbackManagerRefs": [
+          "rollback-manager.yml",
+          "status-badges.yml"
+        ],
+        "missingWorkflows": []
+      },
+      {
+        "test": "Repository configuration",
+        "status": "pass",
+        "checks": [
+          {
+            "name": "README.md exists",
+            "status": "pass"
+          },
+          {
+            "name": "Badge section markers in README",
+            "status": "pass"
+          },
+          {
+            "name": "package.json exists",
+            "status": "pass"
+          },
+          {
+            "name": ".gitignore exists",
+            "status": "pass"
+          },
+          {
+            "name": "Git repository initialized",
+            "status": "pass"
+          },
+          {
+            "name": "Multiple commits available for rollback",
+            "status": "pass"
+          }
+        ]
+      },
+      {
+        "test": "Workflow syntax",
+        "status": "warning",
+        "results": [
+          {
+            "file": ".github/workflows/status-badges.yml",
+            "status": "warning",
+            "issues": [
+              "Line 129: Trailing spaces",
+              "Line 137: Trailing spaces"
+            ]
+          },
+          {
+            "file": ".github/workflows/rollback-manager.yml",
+            "status": "warning",
+            "issues": [
+              "Line 282: Trailing spaces",
+              "Line 648: Trailing spaces"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "recommendations": [
+    "⚠️ Review warnings and consider addressing them",
+    "🔐 Configure GitHub environments (rollback-approval, rollback-manual-approval) for rollback workflow",
+    "🧪 Test workflows in a development environment before production use",
+    "📚 Review workflow documentation and ensure team understanding"
+  ]
+}
