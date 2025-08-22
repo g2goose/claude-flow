@@ -157,7 +157,7 @@ test_services() {
     log "Testing services startup..."
     
     # Skip if CI environment detected
-    if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]]; then
+    if [[ -n "${CI:-}" ]] || [[ -n "${GITHUB_ACTIONS:-}" ]] || [[ -n "${JENKINS_URL:-}" ]] || [[ -n "${TRAVIS:-}" ]] || [[ -n "${CIRCLECI:-}" ]] || [[ -n "${GITLAB_CI:-}" ]]; then
         warn "CI environment detected - skipping service startup test"
         return 0
     fi
