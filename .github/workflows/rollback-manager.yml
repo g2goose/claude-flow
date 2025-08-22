@@ -607,36 +607,95 @@ jobs:
           path: rollback-reports/
           retention-days: ${{ env.ROLLBACK_RETENTION_DAYS }}
 
-      - name: Notify stakeholders
+      - name: Generate comprehensive incident report
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          echo "📋 Generating comprehensive rollback incident report..."
+          
+          # Create rollback data JSON for the incident report generator
+          cat > rollback-incident-data.json << EOF
+          {
+            "sessionId": "${{ needs.failure-detection.outputs.rollback-session-id || 'manual' }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "trigger": {
+              "event": "${{ github.event_name }}",
+              "workflow": "${{ github.event.workflow_run.name || 'N/A' }}",
+              "conclusion": "${{ github.event.workflow_run.conclusion || 'N/A' }}",
+              "commit": "${{ github.sha }}",
+              "branch": "${{ github.ref_name }}"
+            },
+            "failure": {
+              "type": "${{ needs.failure-detection.outputs.failure-type }}",
+              "severity": "${{ needs.failure-detection.outputs.failure-severity }}",
+              "rollbackRequired": true
+            },
+            "rollback": {
+              "target": "${{ github.event.inputs.rollback_target || needs.failure-detection.outputs.rollback-target }}",
+              "reason": "${{ github.event.inputs.rollback_reason || 'Automated rollback due to CI failure' }}"
+            },
+            "verification": {
+              "buildPassed": true,
+              "testsPassed": true,
+              "cliWorking": true,
+              "systemHealthy": true
+            },
+            "monitoring": {
+              "duration": "${{ env.MONITORING_WINDOW_MINUTES }} minutes",
+              "systemStable": true,
+              "issuesDetected": 0
+            },
+            "scope": "${{ github.event.inputs.rollback_scope || 'application' }}"
+          }
+          EOF
+          
+          # Generate the comprehensive incident report
+          node scripts/generate-rollback-incident-report.js "$(cat rollback-incident-data.json)" > rollback-incident-report.md
+
+      - name: Create rollback incident issue
         if: github.event_name != 'workflow_dispatch'
         uses: actions/github-script@v7
         with:
           script: |
-            const report = `
-            ## 🔄 Automated Rollback Executed
+            const fs = require('fs');
             
-            **Status:** ✅ COMPLETED SUCCESSFULLY
-            **Commit:** ${{ needs.execute-rollback.outputs.rollback-commit }}
-            **Target:** ${{ github.event.inputs.rollback_target || needs.failure-detection.outputs.rollback-target }}
-            **Reason:** ${{ github.event.inputs.rollback_reason || 'Automated rollback due to CI failure' }}
+            // Read the comprehensive incident report
+            const incidentReport = fs.readFileSync('rollback-incident-report.md', 'utf8');
             
-            ### Verification Summary
-            - ✅ Build successful
-            - ✅ Tests passing
-            - ✅ CLI functional
-            - ✅ System healthy
-            
-            The system has been automatically rolled back and is now stable.
-            Please investigate the original failure before the next deployment.
-            `;
-            
-            // Create an issue for tracking
-            github.rest.issues.create({
+            // Create an issue using the rollback incident template format
+            const issue = await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `🔄 Automated Rollback Executed - ${new Date().toISOString().split('T')[0]}`,
-              body: report,
-              labels: ['rollback', 'automated', 'incident']
+              title: `🔄 Rollback Incident: Automated rollback executed on ${new Date().toISOString().split('T')[0]}`,
+              body: incidentReport,
+              labels: ['rollback', 'incident', 'high-priority', 'automated']
+            });
+            
+            console.log(`✅ Rollback incident issue created: #${issue.data.number}`);
+            
+            // Also create a summary comment for quick reference
+            const summaryComment = `
+            ## 🔄 Rollback Incident Summary
+            
+            **Session ID:** ${{ needs.failure-detection.outputs.rollback-session-id || 'manual' }}
+            **Status:** ✅ COMPLETED SUCCESSFULLY
+            **Rollback Commit:** ${{ needs.execute-rollback.outputs.rollback-commit }}
+            **Target Commit:** ${{ github.event.inputs.rollback_target || needs.failure-detection.outputs.rollback-target }}
+            **Scope:** ${{ github.event.inputs.rollback_scope || 'application' }}
+            
+            ### Quick Status
+            - ✅ Rollback executed successfully
+            - ✅ Build verification passed
+            - ✅ System health confirmed
+            - ✅ Monitoring completed
+            
+            See full incident details above. The system has been automatically rolled back and is now stable.
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.data.number,
+              body: summaryComment
             });
 
   # Manual rollback approval (for non-emergency cases)

@@ -4,6 +4,7 @@ import { BackupManager } from './backup-manager.js';
 import { RollbackExecutor } from './rollback-executor.js';
 import { StateTracker } from './state-tracker.js';
 import { RecoveryManager } from './recovery-manager.js';
+import { IncidentReporter } from './incident-reporter.js';
 import { printSuccess, printError, printWarning } from '../../../utils.js';
 
 /**
@@ -16,6 +17,7 @@ export class RollbackSystem {
     this.rollbackExecutor = new RollbackExecutor(workingDir);
     this.stateTracker = new StateTracker(workingDir);
     this.recoveryManager = new RecoveryManager(workingDir);
+    this.incidentReporter = new IncidentReporter(workingDir);
   }
 
   /**
@@ -119,8 +121,53 @@ export class RollbackSystem {
 
         // Update state tracking
         await this.stateTracker.recordRollback(targetBackup, 'full');
+
+        // Generate incident report
+        try {
+          const incidentData = {
+            type: 'Manual Rollback',
+            severity: 'Medium',
+            reason: 'Full rollback requested via CLI',
+            targetCommit: targetBackup,
+            backupId: targetBackup,
+            scope: 'full',
+            success: true,
+            errors: rollbackResult.errors,
+            warnings: rollbackResult.warnings,
+            actions: rollbackResult.actions
+          };
+
+          const incidentResult = await this.incidentReporter.generateRollbackIncidentReport(incidentData);
+          if (incidentResult.success) {
+            console.log(`📋 Incident report created: ${incidentResult.sessionId}`);
+          } else {
+            printWarning('Failed to generate incident report');
+          }
+        } catch (error) {
+          printWarning(`Incident report generation failed: ${error.message}`);
+        }
       } else {
         printError('Full rollback failed');
+
+        // Generate incident report for failed rollback
+        try {
+          const incidentData = {
+            type: 'Rollback Failure',
+            severity: 'High',
+            reason: 'Full rollback failed during execution',
+            targetCommit: targetBackup,
+            backupId: targetBackup,
+            scope: 'full',
+            success: false,
+            errors: rollbackResult.errors,
+            warnings: rollbackResult.warnings,
+            actions: rollbackResult.actions
+          };
+
+          await this.incidentReporter.generateRollbackIncidentReport(incidentData);
+        } catch (error) {
+          printWarning(`Failed to generate failure incident report: ${error.message}`);
+        }
       }
     } catch (error) {
       result.success = false;
@@ -165,8 +212,51 @@ export class RollbackSystem {
 
         // Update state tracking
         await this.stateTracker.recordRollback(checkpoint, 'partial', phase);
+
+        // Generate incident report
+        try {
+          const incidentData = {
+            type: 'Manual Rollback',
+            severity: 'Low',
+            reason: `Partial rollback requested for phase: ${phase}`,
+            targetCommit: checkpoint.id || checkpoint,
+            scope: 'partial',
+            phase: phase,
+            success: true,
+            errors: rollbackResult.errors,
+            warnings: rollbackResult.warnings,
+            actions: rollbackResult.actions
+          };
+
+          const incidentResult = await this.incidentReporter.generateRollbackIncidentReport(incidentData);
+          if (incidentResult.success) {
+            console.log(`📋 Incident report created: ${incidentResult.sessionId}`);
+          }
+        } catch (error) {
+          printWarning(`Incident report generation failed: ${error.message}`);
+        }
       } else {
         printError(`Partial rollback failed for phase: ${phase}`);
+
+        // Generate incident report for failed rollback
+        try {
+          const incidentData = {
+            type: 'Rollback Failure',
+            severity: 'Medium',
+            reason: `Partial rollback failed for phase: ${phase}`,
+            targetCommit: checkpoint.id || checkpoint,
+            scope: 'partial',
+            phase: phase,
+            success: false,
+            errors: rollbackResult.errors,
+            warnings: rollbackResult.warnings,
+            actions: rollbackResult.actions
+          };
+
+          await this.incidentReporter.generateRollbackIncidentReport(incidentData);
+        } catch (error) {
+          printWarning(`Failed to generate failure incident report: ${error.message}`);
+        }
       }
     } catch (error) {
       result.success = false;
@@ -236,6 +326,36 @@ export class RollbackSystem {
     }
 
     return result;
+  }
+
+  /**
+   * List incident reports
+   */
+  async listIncidentReports() {
+    try {
+      return await this.incidentReporter.listIncidentReports();
+    } catch (error) {
+      return {
+        success: false,
+        reports: [],
+        errors: [`Failed to list incident reports: ${error.message}`]
+      };
+    }
+  }
+
+  /**
+   * Clean up old incident reports
+   */
+  async cleanupIncidentReports(keepCount = 10) {
+    try {
+      return await this.incidentReporter.cleanupOldReports(keepCount);
+    } catch (error) {
+      return {
+        success: false,
+        cleaned: [],
+        errors: [`Failed to cleanup incident reports: ${error.message}`]
+      };
+    }
   }
 
   /**

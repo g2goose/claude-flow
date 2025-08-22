@@ -59,6 +59,9 @@
     "create-issues:bash": "./scripts/create-github-issues.sh",
     "create-issues:interactive": "./scripts/create-issues.sh",
     "create-issues:dry-run": "node scripts/create-github-issues.js --dry-run",
+    "rollback:incident-report": "node scripts/create-rollback-incident-report.js",
+    "rollback:generate-report": "node scripts/generate-rollback-incident-report.js",
+    "rollback:test-incident": "node scripts/test-incident-reporting.js",
     "start": "node server.js"
   },
   "keywords": [
