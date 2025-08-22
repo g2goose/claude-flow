@@ -312,8 +312,8 @@ export class ConfigManager {
       min: 1,
       max: 100,
       validator: (value, config) => {
-        if (value > config.terminal?.poolSize * 2) {
-          return 'maxConcurrentAgents should not exceed 2x terminal pool size';
+        if (value > (config.terminal?.maxSessions || 10) * 2) {
+          return 'maxConcurrentAgents should not exceed 2x terminal max sessions';
         }
         return null;
       },
