@@ -464,7 +464,7 @@ fi
 **Need Help?** 
 - 🐛 [Report Issues](https://github.com/g2goose/claude-flow/issues)
 - 💬 [Community Discord](https://discord.com/invite/dfxmpwkG2D)
-- 📚 [Full Documentation](https://github.com/g2goose/claude-flow/docs)
+- 📚 [Full Documentation](https://github.com/g2goose/claude-flow/tree/main/docs)
 
 ---
 
