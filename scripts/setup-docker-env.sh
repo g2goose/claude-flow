@@ -60,7 +60,7 @@ check_docker() {
         exit 1
     fi
     
-    if ! command_exists "docker compose"; then
+    if ! docker compose version >/dev/null 2>&1; then
         error "Docker Compose is not available"
         echo "Please install Docker Compose or use Docker Desktop"
         exit 1
