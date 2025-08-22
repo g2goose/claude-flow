@@ -55,6 +55,10 @@
     "prepack": "echo 'Alpha release - skipping build for now'",
     "postpack": "echo 'Package created successfully'",
     "prepare-publish": "node scripts/prepare-publish.js",
+    "create-issues": "node scripts/create-github-issues.js",
+    "create-issues:bash": "./scripts/create-github-issues.sh",
+    "create-issues:interactive": "./scripts/create-issues.sh",
+    "create-issues:dry-run": "node scripts/create-github-issues.js --dry-run",
     "start": "node server.js"
   },
   "keywords": [
