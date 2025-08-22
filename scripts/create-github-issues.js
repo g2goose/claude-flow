@@ -20,7 +20,12 @@ import path from 'path';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+const { fileURLToPath } = require('url');
+
+const __dirname = path.dirname(fileURLToPath(__filename));
 const rootDir = path.join(__dirname, '..');
 const issuesFile = path.join(rootDir, 'GITHUB_ISSUES_TO_CREATE.md');
 
