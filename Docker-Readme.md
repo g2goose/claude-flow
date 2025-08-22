@@ -407,7 +407,18 @@ docker buildx build --platform linux/arm64 -t claude-flow:arm64-native .
 docker compose up -d --platform linux/arm64
 
 # If you encounter architecture issues, force x86_64 emulation
-docker compose up -d --platform linux/amd64
+# Specify platform in docker-compose.override.yml for Apple Silicon
+# docker compose up -d
+
+# Example docker-compose.override.yml to force x86_64 emulation:
+# (Place this file alongside your docker-compose.yml)
+# 
+# services:
+#   app:
+#     platform: linux/amd64
+#
+# Then run:
+# docker compose up -d
 ```
 
 #### Development Workflow
