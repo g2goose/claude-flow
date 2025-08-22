@@ -308,7 +308,18 @@ jobs:
               state: 'success',
               description: 'Docker images deployed successfully',
               environment_url: `https://${process.env.REGISTRY}/${process.env.IMAGE_NAME}`
-            });
+            if (context.payload.deployment?.id) {
+              github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: context.payload.deployment.id,
+                state: 'success',
+                description: 'Docker images deployed successfully',
+                environment_url: `https://${process.env.REGISTRY}/${process.env.IMAGE_NAME}`
+              });
+            } else {
+              console.log('No deployment found in payload; skipping deployment status update.');
+            }
 
   # ===========================
   # Cleanup Old Images
