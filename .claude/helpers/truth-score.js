@@ -321,3 +321,4 @@ if (require.main === module) {
 }
 
 module.exports = TruthScoreCalculator;
+module.exports.default = TruthScoreCalculator;

@@ -76,13 +76,22 @@ export class Logger implements ILogger {
         // Use default config if none provided and not in test environment
         const isTestEnv = process.env.CLAUDE_FLOW_ENV === 'test';
         if (isTestEnv) {
-          throw new Error('Logger configuration required for initialization');
+          // Use a default test configuration instead of throwing error
+          config = (global as any).mockLoggerConfig || {
+            level: 'error',
+            format: 'json',
+            destination: 'console',
+            silent: true
+          };
+        } else {
+          config = {
+            level: 'info',
+            format: 'json',
+            destination: 'console',
+          config = (global as any).mockLoggerConfig || DEFAULT_TEST_LOGGER_CONFIG;
+        } else {
+          config = DEFAULT_LOGGER_CONFIG;
         }
-        config = {
-          level: 'info',
-          format: 'json',
-          destination: 'console',
-        };
       }
       Logger.instance = new Logger(config);
     }

@@ -650,5 +650,5 @@ export class EnhancedUIViews {
   }
 }
 
-export { EnhancedUIViews, ENHANCED_VIEWS };
+export { ENHANCED_VIEWS };
 export default EnhancedUIViews;
