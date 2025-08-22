@@ -663,7 +663,7 @@ describe('Verification Pipeline E2E Tests', () => {
       
       // Execute in batches to simulate realistic load
       const batchSize = 5;
-      const batches: Promise<PipelineResult[]>[] = [];
+      const batches = [];
       for (let i = 0; i < loadTasks.length; i += batchSize) {
         const batch = loadTasks.slice(i, i + batchSize);
         batches.push(
