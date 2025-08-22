@@ -31,6 +31,17 @@ class StatusBadgesVerifier {
     console.log(`${levelColors[level]}[${timestamp}] ${message}${levelColors.reset}`);
   }
 
+  /**
+   * Verifies the structure and contents of the status-badges.yml workflow file.
+   *
+   * Checks for the presence of required sections such as workflow name, triggers,
+   * jobs, and specific job identifiers. Also verifies that expected trigger workflows
+   * are referenced within the file.
+   *
+   * On success, logs a pass and records the result. On failure, logs the error and records it.
+   *
+   * @returns {Promise<boolean>} True if verification passes, false otherwise.
+   */
   async verifyWorkflowFile() {
     this.log('🔍 Verifying status-badges.yml workflow file...');
     
