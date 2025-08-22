@@ -409,13 +409,36 @@ npx claude-flow@alpha help <command>  # Detailed command help
 
 ---
 
-## 📚 **Documentation**
+## 📚 **Documentation & Directory Structure**
+
+**Project Organization:**
+- [📁 src/](src/README.md) - Source code and core implementation
+- [🐳 docker/](docker/README.md) - Containerization and deployment
+- [🧪 tests/](tests/README.md) - Comprehensive test suites
+- [📜 scripts/](scripts/README.md) - Utility scripts and tools
+- [📖 docs/](docs/README.md) - Documentation and guides
+- [💡 examples/](examples/README.md) - Tutorials and use cases
+
+**AI System Components:**
+- [🧠 .hive-mind/](.hive-mind/README.md) - Advanced multi-agent coordination
+- [💾 memory/](memory/README.md) - Persistent memory and learning
+- [⚙️ bin/](bin/README.md) - Executable scripts and entry points
+- [🗄️ data/](data/README.md) - Database files and persistent storage
+
+**Integration & Workflow:**
+- [🤖 .claude/](.claude/README.md) - Claude Code integration
+- [⚙️ .github/](.github/README.md) - GitHub workflows and automation
+- [📊 reports/](reports/README.md) - Analytics and performance reports
+- [🐛 issues/](issues/README.md) - Issue tracking and resolution
+
+**Resources & Archives:**
+- [🎨 assets/](assets/README.md) - Static assets and media files
+- [📦 archive/](archive/README.md) - Historical documentation and legacy systems
 
 **Core Guides:**
 - [User Guide](docs/USER_GUIDE.md) - Complete user documentation
 - [API Reference](docs/API_DOCUMENTATION.md) - All commands and tools
 - [Architecture](docs/ARCHITECTURE.md) - System design
-- [Examples](examples/) - Tutorials and use cases
 
 **Installation:**
 - [Linux Installation](docs/LINUX_INSTALL.md)
