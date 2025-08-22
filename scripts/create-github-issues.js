@@ -3,7 +3,7 @@
  * GitHub Issues Creator Script
  * 
  * This script parses GITHUB_ISSUES_TO_CREATE.md and creates GitHub issues
- * using the GitHub CLI or API. It assigns @copilot to each issue as requested.
+ * using the GitHub CLI or API. It assigns @g2goose to each issue (repository owner).
  * 
  * Usage:
  *   node scripts/create-github-issues.js
@@ -17,22 +17,18 @@
 
 import fs from 'fs';
 import path from 'path';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const { fileURLToPath } = require('url');
-
-const __dirname = path.dirname(fileURLToPath(__filename));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const rootDir = path.join(__dirname, '..');
 const issuesFile = path.join(rootDir, 'GITHUB_ISSUES_TO_CREATE.md');
 
 // Configuration
 const REPO_OWNER = 'g2goose';
 const REPO_NAME = 'claude-flow';
-const ASSIGNEE = 'copilot';
+const ASSIGNEE = 'g2goose';
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -116,28 +112,6 @@ function parseIssuesFile() {
  * Create issue using GitHub CLI
  */
 function createIssueWithCLI(issue) {
-  const labelsArg = issue.labels.length > 0 ? `--label "${issue.labels.join(',')}"` : '';
-  const assigneesArg = `--assignee "${issue.assignees.join(',')}"`;
-  
-  // Escape double quotes in title and body
-  const escapedTitle = issue.title.replace(/"/g, '\\"');
-  const escapedBody = issue.body.replace(/"/g, '\\"');
-  
-  const command = [
-    'gh', 'issue', 'create',
-    `--repo "${REPO_OWNER}/${REPO_NAME}"`,
-    `--title "${escapedTitle}"`,
-    `--body "${escapedBody}"`,
-    labelsArg,
-    assigneesArg
-  ].filter(Boolean).join(' ');
-  
-  if (isDryRun) {
-    console.log(`Would execute: ${command}`);
-    return { success: true, url: `https://github.com/${REPO_OWNER}/${REPO_NAME}/issues/new` };
-  }
-  
-  try {
   const args = [
     'issue', 'create',
     '--repo', `${REPO_OWNER}/${REPO_NAME}`,

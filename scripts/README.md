@@ -1,6 +1,6 @@
 # GitHub Issues Creation Scripts
 
-This directory contains scripts to automatically create GitHub issues from the `GITHUB_ISSUES_TO_CREATE.md` file, with each issue assigned to @copilot as requested.
+This directory contains scripts to automatically create GitHub issues from the `GITHUB_ISSUES_TO_CREATE.md` file, with each issue assigned to @g2goose (repository owner).
 
 ## Available Scripts
 
@@ -72,27 +72,27 @@ The scripts will create **6 GitHub issues** based on `GITHUB_ISSUES_TO_CREATE.md
 
 1. **[CRITICAL]** CI/CD Pipeline failing with 1078 TypeScript compilation errors
    - Labels: `bug`, `high-priority`, `ci/cd`, `typescript`
-   - Assignee: `@copilot`
+   - Assignee: `@g2goose`
 
 2. **[HIGH]** Verification Pipeline tests failing with type compilation errors
    - Labels: `bug`, `high-priority`, `testing`, `verification`
-   - Assignee: `@copilot`
+   - Assignee: `@g2goose`
 
 3. **[MEDIUM]** Truth Scoring Pipeline likely failing due to verification system dependencies
    - Labels: `bug`, `medium-priority`, `verification`, `truth-scoring`
-   - Assignee: `@copilot`
+   - Assignee: `@g2goose`
 
 4. **[MEDIUM]** Integration Tests infrastructure needs reorganization
    - Labels: `bug`, `medium-priority`, `testing`, `infrastructure`
-   - Assignee: `@copilot`
+   - Assignee: `@g2goose`
 
 5. **[MEDIUM]** Docker Build workflow failing due to TypeScript compilation issues
    - Labels: `bug`, `medium-priority`, `docker`, `build`
-   - Assignee: `@copilot`
+   - Assignee: `@g2goose`
 
 6. **[LOW]** Status Badge and Rollback Manager workflows need verification
    - Labels: `enhancement`, `low-priority`, `workflows`
-   - Assignee: `@copilot`
+   - Assignee: `@g2goose`
 
 ## Features
 
@@ -140,7 +140,7 @@ echo $GITHUB_TOKEN
 Ensure your GitHub account has:
 - Read/write access to the repository
 - Permission to create issues
-- Permission to assign users (for @copilot assignment)
+- Permission to assign users (for @g2goose assignment)
 
 ### Rate Limiting
 If you hit rate limits:
@@ -159,14 +159,14 @@ gh issue create \
   --title "[CRITICAL] CI/CD Pipeline failing with 1078 TypeScript compilation errors" \
   --body "$(cat GITHUB_ISSUES_TO_CREATE.md | sed -n '/## 🔴 Issue #1:/,/## 🔴 Issue #2:/p' | head -n -1)" \
   --label "bug,high-priority,ci/cd,typescript" \
-  --assignee "copilot"
+  --assignee "g2goose"
 ```
 
 ## Repository Context
 
 - **Repository**: `g2goose/claude-flow`
 - **Source File**: `GITHUB_ISSUES_TO_CREATE.md`
-- **Target Assignee**: `@copilot` (as requested)
+- **Target Assignee**: `@g2goose` (repository owner)
 - **Issue Count**: 6 issues total
 - **Priority Order**: Critical → High → Medium → Low
 
@@ -174,7 +174,7 @@ gh issue create \
 
 After running the scripts successfully, you should see:
 - 6 new GitHub issues created
-- Each issue assigned to @copilot
+- Each issue assigned to @g2goose
 - Proper labels applied to each issue
 - Issues numbered according to the priority order
 - Links to the created issues for verification

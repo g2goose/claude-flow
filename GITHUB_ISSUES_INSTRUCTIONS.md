@@ -1,6 +1,6 @@
 # Creating GitHub Issues for Workflow Failures
 
-This repository includes automated scripts to create GitHub issues from the `GITHUB_ISSUES_TO_CREATE.md` file. Each issue will be assigned to @copilot as requested.
+This repository includes automated scripts to create GitHub issues from the `GITHUB_ISSUES_TO_CREATE.md` file. Each issue will be assigned to @g2goose (repository owner).
 
 ## Quick Start
 
@@ -58,12 +58,12 @@ The scripts will create **6 GitHub issues** with the following details:
 
 | Priority | Title | Labels | Assignee |
 |----------|-------|--------|----------|
-| 🔴 CRITICAL | CI/CD Pipeline failing with 1078 TypeScript compilation errors | `bug`, `high-priority`, `ci/cd`, `typescript` | @copilot |
-| 🔴 HIGH | Verification Pipeline tests failing with type compilation errors | `bug`, `high-priority`, `testing`, `verification` | @copilot |
-| 🟡 MEDIUM | Truth Scoring Pipeline likely failing due to verification system dependencies | `bug`, `medium-priority`, `verification`, `truth-scoring` | @copilot |
-| 🟡 MEDIUM | Integration Tests infrastructure needs reorganization | `bug`, `medium-priority`, `testing`, `infrastructure` | @copilot |
-| 🟡 MEDIUM | Docker Build workflow failing due to TypeScript compilation issues | `bug`, `medium-priority`, `docker`, `build` | @copilot |
-| 🟢 LOW | Status Badge and Rollback Manager workflows need verification | `enhancement`, `low-priority`, `workflows` | @copilot |
+| 🔴 CRITICAL | CI/CD Pipeline failing with 1078 TypeScript compilation errors | `bug`, `high-priority`, `ci/cd`, `typescript` | @g2goose |
+| 🔴 HIGH | Verification Pipeline tests failing with type compilation errors | `bug`, `high-priority`, `testing`, `verification` | @g2goose |
+| 🟡 MEDIUM | Truth Scoring Pipeline likely failing due to verification system dependencies | `bug`, `medium-priority`, `verification`, `truth-scoring` | @g2goose |
+| 🟡 MEDIUM | Integration Tests infrastructure needs reorganization | `bug`, `medium-priority`, `testing`, `infrastructure` | @g2goose |
+| 🟡 MEDIUM | Docker Build workflow failing due to TypeScript compilation issues | `bug`, `medium-priority`, `docker`, `build` | @g2goose |
+| 🟢 LOW | Status Badge and Rollback Manager workflows need verification | `enhancement`, `low-priority`, `workflows` | @g2goose |
 
 ## Available Scripts
 
@@ -93,7 +93,7 @@ After running the scripts, verify the issues were created:
 
 1. Visit https://github.com/g2goose/claude-flow/issues
 2. Check that 6 new issues exist
-3. Verify each issue is assigned to @copilot
+3. Verify each issue is assigned to @g2goose
 4. Confirm proper labels are applied
 
 ## Troubleshooting
@@ -109,8 +109,8 @@ gh auth login
 
 ### Permission Issues
 - Ensure your GitHub account has repository write access
-- Verify you can assign issues to @copilot
-- Check that @copilot is a valid assignee for the repository
+- Verify you can assign issues to @g2goose
+- Check that @g2goose is a valid assignee for the repository
 
 ### Script Issues
 - Ensure you're in the repository root directory
@@ -127,17 +127,17 @@ gh issue create \
   --title "[CRITICAL] CI/CD Pipeline failing with 1078 TypeScript compilation errors" \
   --body "Content from GITHUB_ISSUES_TO_CREATE.md Issue #1" \
   --label "bug,high-priority,ci/cd,typescript" \
-  --assignee "copilot"
+  --assignee "g2goose"
 ```
 
 ## Repository Context
 
 - **Target Repository**: `g2goose/claude-flow`
 - **Source Document**: `GITHUB_ISSUES_TO_CREATE.md`
-- **Assignee**: `@copilot` (as specifically requested)
+- **Assignee**: `@g2goose` (repository owner)
 - **Total Issues**: 6 workflow failure issues
 - **Priority Order**: Critical → High → Medium → Low
 
 ---
 
-**Note**: These scripts implement the requirement to "create issues and assign @copilot to fix GITHUB_ISSUES_TO_CREATE.md" as specified in the problem statement.
+**Note**: These scripts have been updated to assign issues to @g2goose (repository owner) instead of the non-existent "copilot" user to fix the GraphQL assignment error.

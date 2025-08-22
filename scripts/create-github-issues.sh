@@ -2,7 +2,7 @@
 # GitHub Issues Creator - Bash Script Alternative
 # 
 # This script creates GitHub issues from GITHUB_ISSUES_TO_CREATE.md
-# Each issue is assigned to @copilot as requested.
+# Each issue is assigned to @g2goose (repository owner).
 #
 # Prerequisites:
 #   - GitHub CLI installed and authenticated (gh auth login)
@@ -15,7 +15,7 @@
 set -e
 
 REPO="g2goose/claude-flow"
-ASSIGNEE="copilot"
+ASSIGNEE="g2goose"
 DRY_RUN=false
 
 # Parse arguments
