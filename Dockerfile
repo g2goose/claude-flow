@@ -54,7 +54,7 @@ RUN set -e; \
     echo "🔨 Starting build process..."; \
     npm run build:ts || { \
         echo "⚠️ TypeScript build had errors, but continuing (Issue #1 dependency)"; \
-        mkdir -p dist/cli && echo "export const VERSION = '2.0.0-alpha.90';" > dist/cli/index.js; \
+        mkdir -p dist/cli && echo "export const VERSION = '$(node -p "require('./package.json').version")';" > dist/cli/index.js; \
     }; \
     npm run update-version || echo "⚠️ Version update failed, continuing"; \
     ls -la bin/ || echo "📦 Binary build skipped due to compilation issues"
