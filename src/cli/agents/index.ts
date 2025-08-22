@@ -239,7 +239,7 @@ export class AgentFactory {
       architecture: 'SPARC: Creates technical designs and system architecture',
       pseudocode: 'SPARC: Creates pseudocode and algorithm designs',
       refinement: 'SPARC: Refines and optimizes designs for implementation',
-      steering_documenter: 'Maintains governance documentation and project steering'
+      refinement: 'SPARC: Refines and optimizes designs for implementation'
     };
   }
 
