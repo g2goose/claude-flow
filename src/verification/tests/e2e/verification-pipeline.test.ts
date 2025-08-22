@@ -1031,7 +1031,11 @@ class VerificationPipeline extends EventEmitter {
 
   private async handleVerificationFailureSimulation(result: PipelineResult) {
     // Simulate verification system failure and recovery (always trigger for testing)
-    if (this.verificationFailureConfig.failureProbability > 0) {
+    if (
+      this.verificationFailureConfig &&
+      typeof this.verificationFailureConfig.failureProbability === 'number' &&
+      this.verificationFailureConfig.failureProbability > 0
+    ) {
       // Add system recovery step
       const recoveryResult: VerificationStepResult = {
         step: 'system-recovery',
