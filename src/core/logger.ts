@@ -88,7 +88,9 @@ export class Logger implements ILogger {
             level: 'info',
             format: 'json',
             destination: 'console',
-          };
+          config = (global as any).mockLoggerConfig || DEFAULT_TEST_LOGGER_CONFIG;
+        } else {
+          config = DEFAULT_LOGGER_CONFIG;
         }
       }
       Logger.instance = new Logger(config);
