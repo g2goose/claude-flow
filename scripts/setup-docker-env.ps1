@@ -109,7 +109,7 @@ function Test-SystemRequirements {
     }
     
     # Check available disk space
-    $availableSpace = (Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceID='C:'").FreeSpace / 1GB
+    $availableSpace = (Get-CimInstance -ClassName Win32_LogicalDisk -Filter "DeviceID='C:'").FreeSpace / 1GB
     if ($availableSpace -lt 2) {
         Write-Warning "Available disk space: $([math]::Round($availableSpace, 1))GB. Minimum 2GB required"
     }
