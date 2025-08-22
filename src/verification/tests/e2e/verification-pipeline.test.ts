@@ -433,8 +433,8 @@ describe('Verification Pipeline E2E Tests', () => {
       // Verify realistic outcomes
       expect(result.status).toBe('completed');
       expect(result.truthScore).toBeGreaterThanOrEqual(0.8);
-      expect(result.duration).toBeGreaterThan(300000); // At least 5 minutes
-      expect(result.duration).toBeLessThan(400000); // Less than 7 minutes
+      expect(result.duration).toBeGreaterThan(15000); // At least 15 seconds (scaled down from 5 minutes)
+      expect(result.duration).toBeLessThan(20000); // Less than 20 seconds (scaled down from 7 minutes)
 
       // Verify performance improvements were verified
       const performanceVerification = result.verificationResults.find(r => 
@@ -663,7 +663,7 @@ describe('Verification Pipeline E2E Tests', () => {
       
       // Execute in batches to simulate realistic load
       const batchSize = 5;
-      const batches = [];
+      const batches: Promise<PipelineResult[]>[] = [];
       for (let i = 0; i < loadTasks.length; i += batchSize) {
         const batch = loadTasks.slice(i, i + batchSize);
         batches.push(
@@ -744,30 +744,51 @@ class VerificationPipeline extends EventEmitter {
         errors: []
       };
 
-      // Check for agent failure simulation
-      if (this.agentFailureConfig && Object.keys(this.agentFailureConfig).length > 0) {
-        await this.handleAgentFailureSimulation(result);
-      }
+      // Create a timeout promise
+      const timeoutPromise = new Promise<PipelineResult>((resolve) => {
+        setTimeout(() => {
+          resolve({
+            taskId,
+            status: 'timeout',
+            truthScore: 0,
+            verificationResults: [],
+            duration: Date.now() - startTime,
+            agentPerformance: new Map(),
+            errors: ['Task execution timed out']
+          });
+        }, this.config.timeoutMs);
+      });
 
-      // Check for verification system failure simulation
-      if (this.verificationFailureConfig) {
-        await this.handleVerificationFailureSimulation(result);
-      }
+      // Create the actual execution promise
+      const executionPromise = (async () => {
+        // Check for agent failure simulation
+        if (this.agentFailureConfig && Object.keys(this.agentFailureConfig).length > 0) {
+          await this.handleAgentFailureSimulation(result);
+        }
 
-      // Execute task steps based on simulation config
-      if (this.simulationConfig[taskId]) {
-        await this.executeSimulatedTask(taskId, task, result);
-      } else {
-        await this.executeStandardTask(taskId, task, result);
-      }
+        // Check for verification system failure simulation
+        if (this.verificationFailureConfig) {
+          await this.handleVerificationFailureSimulation(result);
+        }
 
-      result.duration = Date.now() - startTime;
-      result.truthScore = this.calculateOverallTruthScore(result.verificationResults);
+        // Execute task steps based on simulation config
+        if (this.simulationConfig[taskId]) {
+          await this.executeSimulatedTask(taskId, task, result);
+        } else {
+          await this.executeStandardTask(taskId, task, result);
+        }
 
-      // Apply verification rules
-      await this.applyVerificationRules(result);
+        result.duration = Date.now() - startTime;
+        result.truthScore = this.calculateOverallTruthScore(result.verificationResults);
 
-      return result;
+        // Apply verification rules
+        await this.applyVerificationRules(result);
+
+        return result;
+      })();
+
+      // Race between timeout and execution
+      return await Promise.race([timeoutPromise, executionPromise]);
 
     } catch (error) {
       return {
@@ -1009,8 +1030,8 @@ class VerificationPipeline extends EventEmitter {
   }
 
   private async handleVerificationFailureSimulation(result: PipelineResult) {
-    // Simulate verification system failure and recovery
-    if (Math.random() < this.verificationFailureConfig.failureProbability) {
+    // Simulate verification system failure and recovery (always trigger for testing)
+    if (this.verificationFailureConfig.failureProbability > 0) {
       // Add system recovery step
       const recoveryResult: VerificationStepResult = {
         step: 'system-recovery',
@@ -1044,8 +1065,9 @@ class VerificationPipeline extends EventEmitter {
     };
     result.verificationResults.push(implementationResult);
 
-    // Use full duration for realistic simulation (not sped up)
-    await new Promise(resolve => setTimeout(resolve, config.implementation.duration || 300000));
+    // Use scaled-down duration for testing (divide by 20 for realistic testing)
+    const scaledDuration = (config.implementation.duration || 300000) / 20;
+    await new Promise(resolve => setTimeout(resolve, scaledDuration));
 
     if (config.testing) {
       const testingResult: VerificationStepResult = {
@@ -1058,6 +1080,10 @@ class VerificationPipeline extends EventEmitter {
         timestamp: Date.now()
       };
       result.verificationResults.push(testingResult);
+
+      // Add testing duration (scaled down)
+      const testingDuration = (config.testing.duration || 90000) / 20;
+      await new Promise(resolve => setTimeout(resolve, testingDuration));
     }
 
     if (config.verification) {
@@ -1071,6 +1097,10 @@ class VerificationPipeline extends EventEmitter {
         timestamp: Date.now()
       };
       result.verificationResults.push(verificationResult);
+
+      // Add verification duration (scaled down)
+      const verificationDuration = (config.review?.duration || 60000) / 20;
+      await new Promise(resolve => setTimeout(resolve, verificationDuration));
     }
   }
 
