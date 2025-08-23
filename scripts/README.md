@@ -19,21 +19,92 @@ This directory contains utility scripts for building, testing, deploying, and ma
 
 ## GitHub Issues Management
 
-Automated tools for creating and managing GitHub issues.
+🆕 **Enhanced Infrastructure**: Automated tools for creating and managing GitHub issues with support for both template-based batch creation and dynamic job-specific issue creation.
 
-### `create-github-issues.js`
-**Purpose**: Full-featured Node.js script for creating GitHub issues from markdown files  
+> **Major Update**: The issue creation system has been enhanced to remove the previous limitation where only predefined template issues could be created. The new infrastructure supports dynamic issue creation for any workflow job failure or custom scenario.
+
+### `enhanced-issue-creator.js` 🆕
+**Purpose**: Unified interface for all issue creation modes with interactive guidance  
 **Type**: Node.js Script  
 
 ```bash
+# Interactive mode (recommended for new users)
+npm run create-issues
+
+# Create issue for Code Quality job failure  
+npm run create-issue:code-quality
+
+# Template-based batch creation (existing functionality)
+node scripts/enhanced-issue-creator.js --mode=template
+
+# Job failure issue creation (new capability)
+node scripts/enhanced-issue-creator.js --mode=job-failure --job=code-quality
+
+# Custom issue creation (new capability)
+node scripts/enhanced-issue-creator.js --mode=custom --title="Bug Report" --description="Issue details"
+```
+
+**Features**:
+- 🆕 **Interactive guided mode** for easy issue creation
+- 🆕 **Dynamic job failure issues** (code-quality, security-verification, test-verification, build-verification)
+- 🆕 **Custom issue creation** with flexible parameters
+- ✅ **Template-based batch creation** (preserves existing functionality)
+- ✅ Comprehensive error handling and validation
+- ✅ Preview mode with `--dry-run`
+- ✅ Multi-method support (CLI/API)
+
+### `create-dynamic-issue.js` 🆕
+**Purpose**: Core dynamic issue creation engine for any scenario  
+**Type**: Node.js Script  
+
+```bash
+# Code Quality job failure (most common use case)
+node scripts/create-dynamic-issue.js --type=job-failure --job=code-quality --workflow=verification-pipeline
+
+# Security verification failure
+node scripts/create-dynamic-issue.js --type=job-failure --job=security-verification
+
+# Custom bug report
+node scripts/create-dynamic-issue.js --type=custom --title="[BUG] API Error" --description="API returning 500"
+```
+
+**Supported Job Types**:
+- `code-quality`: ESLint, TypeScript, formatting issues
+- `security-verification`: Security audits, vulnerabilities
+- `test-verification`: Unit, integration, E2E test failures  
+- `build-verification`: Compilation, binary creation issues
+
+### `create-code-quality-issue.sh` 🆕
+**Purpose**: Quick Code Quality job failure issue creation  
+**Type**: Shell Script  
+
+```bash
+# Create Code Quality issue for verification pipeline
+./scripts/create-code-quality-issue.sh
+
+# Preview the issue first
+./scripts/create-code-quality-issue.sh --dry-run
+
+# Specify different workflow
+./scripts/create-code-quality-issue.sh --workflow=ci-pipeline
+```
+
+**Features**:
+- 🆕 **Addresses the specific limitation** mentioned in problem statements
+- ✅ One-command Code Quality issue creation
+- ✅ Built-in preview mode
+- ✅ Configurable workflow and assignee
+
+### `create-github-issues.js`
+**Purpose**: Template-based batch issue creation (existing functionality)  
+**Type**: Node.js Script  
+
+```bash
+# Create all predefined issues from template
+npm run create-issues:template
+
 # Preview issues without creating them
 node scripts/create-github-issues.js --dry-run
-
-# Create issues using GitHub CLI (recommended)
-node scripts/create-github-issues.js
-
-# Create issues using GitHub API
-GITHUB_TOKEN="your_token" node scripts/create-github-issues.js --method=api
 ```
 
 **Features**:
@@ -41,37 +112,43 @@ GITHUB_TOKEN="your_token" node scripts/create-github-issues.js --method=api
 - ✅ Supports both GitHub CLI and API methods
 - ✅ Comprehensive error handling and retry logic
 - ✅ Rate limiting protection
-- ✅ Detailed progress reporting
-
-**Prerequisites**: GitHub CLI (`gh`) or `GITHUB_TOKEN` environment variable
 
 ### `create-github-issues.sh`
-**Purpose**: Simple and reliable bash alternative for GitHub issue creation  
+**Purpose**: Bash alternative for template-based issue creation  
 **Type**: Shell Script  
 
 ```bash
-# Test first (dry run)
-./scripts/create-github-issues.sh --dry-run
+# Create template issues using bash
+./scripts/create-github-issues.sh --dry-run  # Preview
+./scripts/create-github-issues.sh           # Create
+```
 
-# Create issues
+### Migration Guide
+
+#### Before (Limited)
+```bash
+# Could only create predefined template issues
+./scripts/create-issues.sh
 ./scripts/create-github-issues.sh
 ```
 
-**Features**:
-- ✅ Simple GitHub CLI integration
-- ✅ Pre-structured issue content
-- ✅ Built-in rate limiting
-- ✅ Easy to understand and modify
-
-**Prerequisites**: GitHub CLI (`gh`) authenticated
-
-### `create-issues.sh`
-**Purpose**: Additional issue creation utility  
-**Type**: Shell Script  
-
+#### After (Enhanced)
 ```bash
-./scripts/create-issues.sh
+# Same template functionality
+npm run create-issues:template
+
+# NEW: Interactive mode
+npm run create-issues
+
+# NEW: Specific job failures  
+npm run create-issue:code-quality
+node scripts/create-dynamic-issue.js --type=job-failure --job=security-verification
+
+# NEW: Custom issues
+node scripts/create-dynamic-issue.js --type=custom --title="My Issue" --description="Details"
 ```
+
+**Prerequisites**: GitHub CLI (`gh`) authenticated or `GITHUB_TOKEN` environment variable
 
 ---
 
