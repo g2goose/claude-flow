@@ -11,7 +11,8 @@ This directory contains archived documentation, legacy system implementations, a
 5. [Analysis Reports](#analysis-reports) (1 collection)
 6. [Root Cleanup](#root-cleanup) (1 archive)
 7. [Swarm Analysis](#swarm-analysis) (1 collection)
-8. [Quick Reference](#quick-reference)
+8. [Superseded Documentation](#superseded-documentation) (1 collection)
+9. [Quick Reference](#quick-reference)
 
 ---
 
@@ -176,6 +177,32 @@ This directory contains archived documentation, legacy system implementations, a
 
 ---
 
+## Superseded Documentation
+
+### superseded/
+**Documentation files that have been superseded or are no longer actively maintained**
+- Status reports and incident documentation from completed work
+- Historical planning documents and roadmaps
+- Temporary documentation created for specific tasks or issues
+- Build and deployment reports from resolved incidents
+
+**Archive Date:** 2025-01-25
+
+**Contents:**
+- Code quality improvement reports and summaries
+- GitHub workflow planning and instruction documents
+- Rollback incident reports and workflow verification
+- Task completion and repository review reports
+- Historical implementation roadmaps and issue creation guides
+
+**Usage:**
+- Reference for understanding completed work and resolved issues
+- Historical context for development decisions
+- Troubleshooting similar future issues using past resolution patterns
+- Documentation of processes that may be reactivated if needed
+
+---
+
 ## Quick Reference
 
 ### Archive Organization
@@ -187,7 +214,8 @@ archive/
 ├── releases/           # Release artifacts and documentation
 ├── reports/            # Analysis reports and evaluations
 ├── root-cleanup/       # Repository cleanup artifacts
-└── swarm-analysis/     # Swarm coordination analysis
+├── swarm-analysis/     # Swarm coordination analysis
+└── superseded/         # Superseded documentation (2025-01-25)
 ```
 
 ### Accessing Archived Content
@@ -198,11 +226,17 @@ find archive/debug-docs -name "*.md" | head -10
 # Review legacy memory system
 ls -la archive/legacy-memory-system/docs/
 
+# Check superseded documentation (new)
+ls -la archive/superseded/
+
 # Check release history
 ls -la archive/releases/
 
 # View analysis reports
 find archive/reports -name "*.md" | sort
+
+# Find specific content across all archives
+find archive -name "*.md" | grep -i "keyword"
 ```
 
 ### Common Use Cases

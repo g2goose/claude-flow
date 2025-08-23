@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0-alpha.90] - 2025-01-25
+
+### 🧹 Repository Maintenance
+- **Documentation Cleanup**: Moved superseded documentation files to `archive/superseded/`
+  - Archived 16 status reports, incident reports, and temporary documentation files
+  - Cleaned root directory to contain only essential documentation
+  - Updated CHANGELOG.md to reflect current version (fixed version inconsistency)
+  - Improved repository organization and maintainability
+
+### 📁 Files Moved to Archive
+- CODE_QUALITY_IMPROVEMENT_PLAN.md, CODE_QUALITY_ISSUE_SUMMARY.md, CODE_QUALITY_RESOLUTION_COMPLETE.md
+- DOCKER_BUILD_FIX_SUMMARY.md, EXECUTION_READY.md
+- GITHUB_ISSUES_INSTRUCTIONS.md, GITHUB_ISSUES_PLAN.md, GITHUB_ISSUES_TO_CREATE.md
+- REPOSITORY_REVIEW_FINAL_REPORT.md, ROLLBACK_INCIDENT_REPORTING_IMPLEMENTATION.md
+- TASK_COMPLETION_VERIFICATION.md, TRUTH_SCORING_ISSUE.md
+- WORKFLOW_ISSUES_SUMMARY.md, WORKFLOW_VERIFICATION_REPORT.md
+- create-code-quality-issue.md, implementation-roadmap.md
+
+### ✅ Essential Documentation Maintained
+- README.md - Main project documentation
+- CHANGELOG.md - Version history and release notes
+- CLAUDE.md - Claude Code integration guide
+- LICENSE - MIT license
+- Docker-Readme.md - Docker deployment guide
+
 ## [2.0.0-alpha.89] - 2025-08-13
 
 > **Highlights**: Working auto-fix implementation for pair programming with real command execution, complete command documentation system, real Claude Code stream chaining with background execution, enhanced help system with emojis, comprehensive pair programming features with guidance modes, and complete removal of simulation mode in training.
