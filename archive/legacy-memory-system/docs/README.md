@@ -137,3 +137,5 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for development setup and guidelines.
 - **Documentation**: [GitHub Wiki](https://github.com/sparc/memory-bank/wiki)
 - **Issues**: [GitHub Issues](https://github.com/sparc/memory-bank/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/sparc/memory-bank/discussions)
+
+*Last Updated: 2025-08-23*

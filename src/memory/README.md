@@ -290,3 +290,5 @@ memory.on('gc', console.log);
 ## License
 
 Part of the ruv-swarm project. See main LICENSE file.
+
+*Last Updated: 2025-08-23*

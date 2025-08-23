@@ -104,3 +104,5 @@ npx claude-flow init --force
 - Slash commands follow Claude Code's markdown format with YAML frontmatter
 - SPARC modes are fully integrated with Claude-Flow's orchestration system
 - All generated files include comprehensive documentation
+
+*Last Updated: 2025-08-23*

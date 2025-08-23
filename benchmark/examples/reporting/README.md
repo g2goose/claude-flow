@@ -221,3 +221,5 @@ for report in viewer.reports:
 - All timestamps are in ISO format for consistency
 - Metrics are aggregated at multiple levels for flexibility
 - File references use absolute paths when possible
+
+*Last Updated: 2025-08-23*

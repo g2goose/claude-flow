@@ -172,3 +172,5 @@ To contribute new test cases or improvements:
 ## License
 
 This example is part of the Claude-Flow project and follows the same license terms.
+
+*Last Updated: 2025-08-23*

@@ -1,11 +1,11 @@
 # 🌊 Claude-Flow: Enterprise AI Orchestration Platform
 
 <!-- BADGES-START -->
-[![Verification Pipeline](https://img.shields.io/github/actions/workflow/status/ruvnet/claude-code-flow/verification-pipeline.yml?branch=main&label=verification&style=flat-square)](https://github.com/ruvnet/claude-code-flow/actions/workflows/verification-pipeline.yml)
-[![Truth Scoring](https://img.shields.io/github/actions/workflow/status/ruvnet/claude-code-flow/truth-scoring.yml?branch=main&label=truth%20score&style=flat-square)](https://github.com/ruvnet/claude-code-flow/actions/workflows/truth-scoring.yml)
-[![Integration Tests](https://img.shields.io/github/actions/workflow/status/ruvnet/claude-code-flow/integration-tests.yml?branch=main&label=integration&style=flat-square)](https://github.com/ruvnet/claude-code-flow/actions/workflows/integration-tests.yml)
-[![Rollback Manager](https://img.shields.io/github/actions/workflow/status/ruvnet/claude-code-flow/rollback-manager.yml?branch=main&label=rollback&style=flat-square)](https://github.com/ruvnet/claude-code-flow/actions/workflows/rollback-manager.yml)
-[![CI/CD](https://img.shields.io/github/actions/workflow/status/ruvnet/claude-code-flow/ci.yml?branch=main&label=ci%2Fcd&style=flat-square)](https://github.com/ruvnet/claude-code-flow/actions/workflows/ci.yml)
+[![Verification Pipeline](https://img.shields.io/github/actions/workflow/status/g2goose/claude-flow/verification-pipeline.yml?branch=main&label=verification&style=flat-square)](https://github.com/g2goose/claude-flow/actions/workflows/verification-pipeline.yml)
+[![Truth Scoring](https://img.shields.io/github/actions/workflow/status/g2goose/claude-flow/truth-scoring.yml?branch=main&label=truth%20score&style=flat-square)](https://github.com/g2goose/claude-flow/actions/workflows/truth-scoring.yml)
+[![Integration Tests](https://img.shields.io/github/actions/workflow/status/g2goose/claude-flow/integration-tests.yml?branch=main&label=integration&style=flat-square)](https://github.com/g2goose/claude-flow/actions/workflows/integration-tests.yml)
+[![Rollback Manager](https://img.shields.io/github/actions/workflow/status/g2goose/claude-flow/rollback-manager.yml?branch=main&label=rollback&style=flat-square)](https://github.com/g2goose/claude-flow/actions/workflows/rollback-manager.yml)
+[![CI/CD](https://img.shields.io/github/actions/workflow/status/g2goose/claude-flow/ci.yml?branch=main&label=ci%2Fcd&style=flat-square)](https://github.com/g2goose/claude-flow/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Version](https://img.shields.io/npm/v/claude-flow.svg?style=flat-square)](https://www.npmjs.com/package/claude-flow)
 <!-- BADGES-END -->
@@ -164,8 +164,8 @@ The platform integrates seamlessly with Claude Code through the Model Context Pr
 |----------|-------------|
 | **[📋 CHANGELOG.md](CHANGELOG.md)** | Version history and release notes |
 | **[📄 LICENSE](LICENSE)** | MIT License terms |
-| **[🔧 implementation-roadmap.md](implementation-roadmap.md)** | Development roadmap and MCP tools implementation |
-| **[📊 REPOSITORY_REVIEW_FINAL_REPORT.md](REPOSITORY_REVIEW_FINAL_REPORT.md)** | Comprehensive repository analysis and status |
+| **[🔧 implementation-roadmap.md](archive/superseded/implementation-roadmap.md)** | Development roadmap and MCP tools implementation |
+| **[📊 REPOSITORY_REVIEW_FINAL_REPORT.md](archive/superseded/REPOSITORY_REVIEW_FINAL_REPORT.md)** | Comprehensive repository analysis and status |
 
 ---
 
@@ -745,5 +745,7 @@ npx claude-flow@alpha init --force
 [![Discord](https://img.shields.io/badge/Discord-Community-purple?style=for-the-badge&logo=discord)](https://discord.com/invite/dfxmpwkG2D)
 
 **Built by [rUv](https://github.com/ruvnet) | v2.0.0 Alpha**
+
+*Last Updated: 2025-08-23*
 
 </div>

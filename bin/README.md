@@ -315,3 +315,5 @@ chmod 644 bin/claude-flow.js
 *Last Updated: ${new Date().toISOString()}*
 
 This executables directory provides flexible entry points for Claude Flow operations, supporting development, production, and specialized use cases.
+
+*Last Updated: 2025-08-23*

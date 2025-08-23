@@ -119,3 +119,5 @@ Brief description of what will be learned
 - Key takeaways
 - Next tutorials
 ```
+
+*Last Updated: 2025-08-23*

@@ -1281,4 +1281,4 @@ cd infrastructure/docker && docker-compose up
 
 ---
 
-*For older versions, see the [releases page](https://github.com/ruvnet/claude-code-flow/releases).*
+*For older versions, see the [releases page](https://github.com/g2goose/claude-flow/releases).*

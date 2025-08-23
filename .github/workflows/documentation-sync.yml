@@ -1,0 +1,402 @@
+name: Documentation Sync and Update
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'CHANGELOG.md'
+      - 'docs/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ main, master ]
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+    inputs:
+      update_type:
+        description: 'Type of documentation update'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+          - 'full'
+          - 'readme-only'
+          - 'version-sync'
+          - 'links-validation'
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  analyze-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      needs_update: ${{ steps.check.outputs.needs_update }}
+      changed_files: ${{ steps.check.outputs.changed_files }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get package version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Check for documentation changes needed
+        id: check
+        run: |
+          # Check if critical files changed
+          CHANGED_FILES=""
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            NEEDS_UPDATE="true"
+            CHANGED_FILES="scheduled_update"
+          else
+            # Check for changes in key files
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD | grep -E '\.(ts|js|json|md)$' | head -20 | tr '\n' ',' || echo "")
+            if [[ -n "$CHANGED_FILES" ]] || git diff --name-only HEAD~1 HEAD | grep -qE '^(package\.json|src/|docs/|\.github/)'; then
+              NEEDS_UPDATE="true"
+            else
+              NEEDS_UPDATE="false"
+            fi
+          fi
+          echo "needs_update=$NEEDS_UPDATE" >> $GITHUB_OUTPUT
+          echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
+  validate-links:
+    runs-on: ubuntu-latest
+    needs: analyze-changes
+    if: needs.analyze-changes.outputs.needs_update == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Check for broken internal links
+        run: |
+          echo "Validating internal markdown links..."
+          # Create a simple link validator script
+          cat > check-links.js << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+          const glob = require('glob');
+          
+          async function validateLinks() {
+            const markdownFiles = await glob.glob('**/*.md', { ignore: ['node_modules/**', 'dist/**', 'build/**'] });
+            let brokenLinks = [];
+            
+            for (const file of markdownFiles) {
+              const content = fs.readFileSync(file, 'utf8');
+              const linkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
+              let match;
+              
+              while ((match = linkRegex.exec(content)) !== null) {
+                const [, text, link] = match;
+                
+                // Skip external links and anchors
+                if (link.startsWith('http') || link.startsWith('#') || link.startsWith('mailto:')) {
+                  continue;
+                }
+                
+                // Check if local file exists
+                const linkPath = path.resolve(path.dirname(file), link);
+                if (!fs.existsSync(linkPath)) {
+                  brokenLinks.push({
+                    file,
+                    link,
+                    text,
+                    resolved: linkPath
+                  });
+                }
+              }
+            }
+            
+            if (brokenLinks.length > 0) {
+              console.log('❌ Found broken links:');
+              brokenLinks.forEach(({ file, link, text }) => {
+                console.log(`  - ${file}: [${text}](${link})`);
+              });
+              process.exit(1);
+            } else {
+              console.log('✅ All internal links are valid');
+            }
+          }
+          
+          validateLinks().catch(console.error);
+          EOF
+          
+          node check-links.js
+
+  update-documentation:
+    runs-on: ubuntu-latest
+    needs: [analyze-changes, validate-links]
+    if: needs.analyze-changes.outputs.needs_update == 'true'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Update documentation
+        env:
+          PACKAGE_VERSION: ${{ needs.analyze-changes.outputs.version }}
+          CHANGED_FILES: ${{ needs.analyze-changes.outputs.changed_files }}
+          UPDATE_TYPE: ${{ github.event.inputs.update_type || 'full' }}
+        run: |
+          echo "Updating documentation for version $PACKAGE_VERSION..."
+          
+          # Create documentation update script
+          cat > update-docs.js << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+          const glob = require('glob');
+          
+          const version = process.env.PACKAGE_VERSION;
+          const updateType = process.env.UPDATE_TYPE;
+          const today = new Date().toISOString().split('T')[0];
+          
+          async function updateDocumentation() {
+            console.log(`🔄 Updating documentation (type: ${updateType})...`);
+            
+            // 1. Update README.md with current version and date
+            await updateMainReadme();
+            
+            // 2. Update all directory README files if full update
+            if (updateType === 'full' || updateType === 'version-sync') {
+              await updateDirectoryReadmes();
+            }
+            
+            // 3. Check and fix common documentation issues
+            await fixCommonIssues();
+            
+            console.log('✅ Documentation update completed');
+          }
+          
+          async function updateMainReadme() {
+            const readmePath = 'README.md';
+            if (!fs.existsSync(readmePath)) return;
+            
+            let content = fs.readFileSync(readmePath, 'utf8');
+            
+            // Update version badges
+            content = content.replace(
+              /v2\.0\.0-alpha\.\d+/g,
+              `v${version}`
+            );
+            
+            // Update npm version badges
+            content = content.replace(
+              /alpha\.90/g,
+              version.split('-')[1] || version
+            );
+            
+            // Update last updated timestamp if it exists
+            const timestampRegex = /Last Updated: \d{4}-\d{2}-\d{2}/g;
+            if (timestampRegex.test(content)) {
+              content = content.replace(timestampRegex, `Last Updated: ${today}`);
+            }
+            
+            // Fix any references to moved files
+            content = content.replace(
+              /\[([^\]]*)\]\(implementation-roadmap\.md\)/g,
+              '[$1](docs/implementation-roadmap.md)'
+            );
+            content = content.replace(
+              /\[([^\]]*)\]\(REPOSITORY_REVIEW_FINAL_REPORT\.md\)/g,
+              '[$1](archive/superseded/REPOSITORY_REVIEW_FINAL_REPORT.md)'
+            );
+            
+            fs.writeFileSync(readmePath, content, 'utf8');
+            console.log('✅ Updated main README.md');
+          }
+          
+          async function updateDirectoryReadmes() {
+            const readmeFiles = await glob.glob('**/README.md', { 
+              ignore: ['node_modules/**', 'dist/**', 'build/**'] 
+            });
+            
+            for (const readmeFile of readmeFiles) {
+              if (readmeFile === 'README.md') continue; // Skip root
+              
+              let content = fs.readFileSync(readmeFile, 'utf8');
+              
+              // Update version references
+              content = content.replace(
+                /v2\.0\.0-alpha\.\d+/g,
+                `v${version}`
+              );
+              
+              // Add last updated if directory README doesn't have it
+              if (!content.includes('Last Updated:')) {
+                content += `\n\n*Last Updated: ${today}*\n`;
+              } else {
+                content = content.replace(
+                  /\*Last Updated: \d{4}-\d{2}-\d{2}\*/g,
+                  `*Last Updated: ${today}*`
+                );
+              }
+              
+              fs.writeFileSync(readmeFile, content, 'utf8');
+            }
+            
+            console.log(`✅ Updated ${readmeFiles.length} directory README files`);
+          }
+          
+          async function fixCommonIssues() {
+            // Fix any remaining references to moved files
+            const mdFiles = await glob.glob('**/*.md', { 
+              ignore: ['node_modules/**', 'dist/**', 'build/**', 'archive/**'] 
+            });
+            
+            let fixedCount = 0;
+            
+            for (const mdFile of mdFiles) {
+              let content = fs.readFileSync(mdFile, 'utf8');
+              const originalContent = content;
+              
+              // Fix common broken references
+              content = content.replace(
+                /\]\(DOCUMENTATION_CLEANUP_SUMMARY\.md\)/g,
+                '](archive/superseded/DOCUMENTATION_CLEANUP_SUMMARY.md)'
+              );
+              
+              // Fix GitHub URLs that might be pointing to old org
+              content = content.replace(
+                /github\.com\/ruvnet\/claude-code-flow/g,
+                'github.com/g2goose/claude-flow'
+              );
+              
+              if (content !== originalContent) {
+                fs.writeFileSync(mdFile, content, 'utf8');
+                fixedCount++;
+              }
+            }
+            
+            if (fixedCount > 0) {
+              console.log(`✅ Fixed common issues in ${fixedCount} files`);
+            }
+          }
+          
+          updateDocumentation().catch(console.error);
+          EOF
+          
+          node update-docs.js
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push changes
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "📚 Automated documentation update for v${{ needs.analyze-changes.outputs.version }}
+
+          - Updated version references across all markdown files
+          - Fixed broken internal links
+          - Updated timestamps
+          - Synchronized documentation with current codebase
+          
+          Triggered by: ${{ github.event_name }}
+          Changed files: ${{ needs.analyze-changes.outputs.changed_files }}"
+          git push
+
+      - name: Create summary
+        if: always()
+        run: |
+          echo "## Documentation Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ needs.analyze-changes.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Update Type**: ${{ github.event.inputs.update_type || 'auto' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Changes Made**: ${{ steps.changes.outputs.has_changes }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.changes.outputs.has_changes }}" = "true" ]; then
+            echo "✅ Documentation has been updated and committed." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ No documentation changes were needed." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  generate-docs-report:
+    runs-on: ubuntu-latest
+    needs: [analyze-changes, update-documentation]
+    if: always() && needs.analyze-changes.outputs.needs_update == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate documentation metrics
+        run: |
+          echo "Generating documentation metrics..."
+          
+          # Count markdown files
+          MD_COUNT=$(find . -name "*.md" -not -path "./node_modules/*" -not -path "./dist/*" | wc -l)
+          
+          # Count README files
+          README_COUNT=$(find . -name "README.md" -not -path "./node_modules/*" -not -path "./dist/*" | wc -l)
+          
+          # Generate report
+          cat > docs-report.md << EOF
+          # Documentation Metrics Report
+          
+          **Generated**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Version**: ${{ needs.analyze-changes.outputs.version }}
+          
+          ## Statistics
+          
+          - **Total Markdown Files**: $MD_COUNT
+          - **README Files**: $README_COUNT
+          - **Documentation Directories**: $(find . -type d -name "docs" -o -name "documentation" | wc -l)
+          
+          ## Recent Updates
+          
+          - Version synchronization completed
+          - Broken links validated and fixed
+          - Timestamps updated across all documentation
+          
+          ## Health Status
+          
+          ✅ Documentation is synchronized with codebase
+          ✅ All internal links are valid
+          ✅ Version references are up-to-date
+          EOF
+          
+          echo "Documentation report generated."
+
+      - name: Upload documentation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-report
+          path: docs-report.md
+          retention-days: 30

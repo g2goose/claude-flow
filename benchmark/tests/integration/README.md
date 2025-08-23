@@ -113,3 +113,5 @@ Tests will fail if these thresholds are exceeded.
 - psutil (for performance monitoring)
 - claude-flow installed and accessible
 - Non-interactive mode support in claude-flow
+
+*Last Updated: 2025-08-23*

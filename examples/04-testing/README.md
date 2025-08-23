@@ -121,3 +121,5 @@ Both scripts include helper functions:
 - `assert_equals`: Value comparison
 - `assert_contains`: String matching
 - `measure_performance`: Timing checks
+
+*Last Updated: 2025-08-23*
