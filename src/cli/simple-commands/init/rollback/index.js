@@ -123,29 +123,18 @@ export class RollbackSystem {
         await this.stateTracker.recordRollback(targetBackup, 'full');
 
         // Generate incident report
-        try {
-          const incidentData = {
-            type: 'Manual Rollback',
-            severity: 'Medium',
-            reason: 'Full rollback requested via CLI',
-            targetCommit: targetBackup,
-            backupId: targetBackup,
-            scope: 'full',
-            success: true,
-            errors: rollbackResult.errors,
-            warnings: rollbackResult.warnings,
-            actions: rollbackResult.actions
-          };
-
-          const incidentResult = await this.incidentReporter.generateRollbackIncidentReport(incidentData);
-          if (incidentResult.success) {
-            console.log(`📋 Incident report created: ${incidentResult.sessionId}`);
-          } else {
-            printWarning('Failed to generate incident report');
-          }
-        } catch (error) {
-          printWarning(`Incident report generation failed: ${error.message}`);
-        }
+        await this._generateSuccessfulRollbackIncidentReport({
+          type: 'Manual Rollback',
+          severity: 'Medium',
+          reason: 'Full rollback requested via CLI',
+          targetCommit: targetBackup,
+          backupId: targetBackup,
+          scope: 'full',
+          success: true,
+          errors: rollbackResult.errors,
+          warnings: rollbackResult.warnings,
+          actions: rollbackResult.actions
+        });
       } else {
         printError('Full rollback failed');
 
