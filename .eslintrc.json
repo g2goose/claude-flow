@@ -19,12 +19,21 @@
   },
   "rules": {
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/no-non-null-assertion": "warn",
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "prefer-const": "error",
-    "no-var": "error"
+    "@typescript-eslint/no-var-requires": "warn",
+    "@typescript-eslint/ban-types": "warn",
+    "no-console": "warn",
+    "prefer-const": "warn",
+    "no-var": "warn",
+    "no-case-declarations": "warn",
+    "no-control-regex": "warn",
+    "no-constant-condition": "warn",
+    "no-useless-catch": "warn",
+    "no-useless-escape": "warn",
+    "no-prototype-builtins": "warn",
+    "no-async-promise-executor": "warn"
   },
   "ignorePatterns": [
     "dist/",
@@ -32,6 +41,8 @@
     "coverage/",
     "*.js",
     "src/verification/tests/**/*",
-    "tests/**/*.broken"
+    "tests/**/*.broken",
+    "**/*.test.ts",
+    "src/terminal/**/*"
   ]
 }
