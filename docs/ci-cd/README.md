@@ -248,7 +248,18 @@ Intelligent automated rollback system that detects failures and can automaticall
 - Pre-rollback validation (90 days)
 - Rollback execution logs (90 days)
 - Post-rollback monitoring (90 days)
+- **Rollback incident reports** (GitHub issues using rollback incident template)
 - Stakeholder notifications (GitHub issues)
+
+### Incident Management Integration
+The rollback manager automatically creates comprehensive incident reports using the 🔄 Rollback Incident template when rollbacks are executed. These reports include:
+- Complete incident timeline and impact assessment
+- Rollback session tracking and metadata
+- Root cause analysis framework
+- Prevention measures and follow-up actions
+- Integration with monitoring and verification systems
+
+For detailed information about the rollback incident system, see [Rollback Incident System Documentation](../rollback-incident-system.md).
 
 ## 📊 Status Badges
 

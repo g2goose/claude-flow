@@ -1,51 +1,59 @@
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
-// incident-reporter.js - Generate incident reports for rollback operations
+
+// incident-reporter.js - Generate rollback incident reports
+
+import { promises as fs } from 'fs';
 
 export class IncidentReporter {
   constructor(workingDir) {
     this.workingDir = workingDir;
-    this.reportsDir = join(workingDir, '.claude-flow-incidents');
+    this.reportsDir = `${workingDir}/.claude-flow-incidents`;
   }
 
   /**
-   * Generate and save rollback incident report
+   * Generate a rollback incident report
    */
-  async generateRollbackIncidentReport(rollbackData) {
+  async generateIncidentReport(rollbackData, options = {}) {
     const result = {
       success: true,
-      reportFile: null,
-      sessionId: null,
+      reportId: null,
+      reportPath: null,
       errors: [],
     };
 
     try {
-      // Generate session ID
-      const sessionId = rollbackData.sessionId || `rollback-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      result.sessionId = sessionId;
 
-      // Create reports directory
       await this.ensureReportsDir();
 
-      // Generate incident report content
-      const reportContent = this.formatIncidentReport(rollbackData, sessionId);
+      const timestamp = new Date().toISOString();
+      const reportId = `incident-${timestamp.replace(/[:.TZ]/g, '-')}`;
+      result.reportId = reportId;
 
-      // Save report to file
-      const reportFile = join(this.reportsDir, `rollback-incident-${sessionId}.md`);
-      await writeFile(reportFile, reportContent);
-      result.reportFile = reportFile;
+      const reportPath = `${this.reportsDir}/${reportId}.md`;
+      result.reportPath = reportPath;
 
-      // Also save JSON data for automation
-      const jsonFile = join(this.reportsDir, `rollback-incident-${sessionId}.json`);
-      await writeFile(jsonFile, JSON.stringify({
-        ...rollbackData,
-        sessionId,
-        timestamp: new Date().toISOString(),
-        reportFile
-      }, null, 2));
+      const report = await this.formatIncidentReport(rollbackData, timestamp, options);
+      await fs.writeFile(reportPath, report, 'utf8');
 
-      console.log(`📋 Incident report generated: ${reportFile}`);
-      console.log(`💾 Incident data saved: ${jsonFile}`);
+      // Also create JSON metadata
+      const metadata = {
+        id: reportId,
+        timestamp,
+        type: 'rollback_incident',
+        severity: rollbackData.severity || 'Medium',
+        status: rollbackData.status || 'investigating',
+        rollbackSessionId: rollbackData.sessionId,
+        sourceCommit: rollbackData.sourceCommit,
+        targetCommit: rollbackData.targetCommit,
+        reason: rollbackData.reason,
+      };
+
+      await fs.writeFile(
+        `${this.reportsDir}/${reportId}.json`,
+        JSON.stringify(metadata, null, 2),
+        'utf8'
+      );
+
+      console.log(`📋 Incident report generated: ${reportPath}`);
 
     } catch (error) {
       result.success = false;
@@ -56,64 +64,57 @@ export class IncidentReporter {
   }
 
   /**
-   * Format incident report using the GitHub template structure
+
+   * Format the incident report using the template structure
    */
-  formatIncidentReport(data, sessionId) {
+  async formatIncidentReport(data, timestamp, options = {}) {
     const {
-      type = 'Manual Rollback',
+      incidentType = 'Manual Rollback',
       severity = 'Medium',
-      reason = 'Rollback requested',
-      sourceCommit = 'Unknown',
-      targetCommit = 'Unknown',
-      backupId,
-      scope = 'application',
-      phase,
-      success = true,
-      errors = [],
-      warnings = [],
-      actions = []
+      status = 'Investigating',
+      sessionId = 'manual',
+      sourceCommit = 'unknown',
+      targetCommit = 'unknown',
+      reason = 'Manual rollback requested',
+      userImpact = 'Unknown',
+      duration = 'Unknown',
+      components = ['Application'],
     } = data;
 
-    const timestamp = new Date().toISOString().replace('T', ' ').replace('Z', ' UTC');
-    const status = success ? 'Resolved' : 'Investigating';
+    const timeStr = timestamp.split('T')[1].split('.')[0];
+    const dateStr = timestamp.split('T')[0];
 
-    // Determine affected components based on scope and phase
-    let affectedComponents = ['Claude Flow Core'];
-    if (scope === 'full' || phase === 'all') {
-      affectedComponents = ['Claude Flow Core', 'CLI Interface', 'Configuration System', 'Rollback System'];
-    } else if (phase) {
-      affectedComponents.push(`Initialization Phase: ${phase}`);
-    }
+    return `# 🔄 Rollback Incident Report
 
-    // Determine user impact
-    const userImpact = severity === 'High' || severity === 'Critical' ? 'All users' : 'Limited impact';
-    const duration = success ? 'Immediate recovery' : 'Recovery in progress';
+**Generated:** ${timestamp}  
+**Report ID:** ${sessionId}  
 
-    return `## 🔄 Rollback Incident Details
+## 🔄 Rollback Incident Details
 
 ### Incident Summary
-- **Incident Type:** ${type}
+- **Incident Type:** ${incidentType}
 - **Severity:** ${severity}
 - **Status:** ${status}
-- **Detected At:** ${timestamp}
+- **Detected At:** ${dateStr} ${timeStr} UTC
 
 ### Rollback Information
 - **Rollback Session ID:** ${sessionId}
 - **Source Commit:** ${sourceCommit}
 - **Target Commit:** ${targetCommit}
 - **Rollback Reason:** ${reason}
-${backupId ? `- **Backup ID:** ${backupId}` : ''}
-${phase ? `- **Phase:** ${phase}` : ''}
 
 ### Impact Assessment
-- [${severity === 'Critical' || severity === 'High' ? 'x' : ' '}] Production services affected
-- [${severity === 'Critical' || severity === 'High' ? 'x' : ' '}] User-facing functionality impacted
+- [ ] Production services affected
+- [ ] User-facing functionality impacted
+
 - [ ] Data integrity concerns
 - [ ] Performance degradation
 - [ ] Security implications
 
 **Affected Components:**
-${affectedComponents.map(comp => `- ${comp}`).join('\n')}
+
+${components.map(c => `- ${c}`).join('\n')}
+
 
 **Estimated User Impact:**
 - **Users Affected:** ${userImpact}
@@ -121,122 +122,87 @@ ${affectedComponents.map(comp => `- ${comp}`).join('\n')}
 
 ### Timeline
 
+<!-- Provide a timeline of events -->
+
 **Detection:**
-- ${timestamp}: Rollback initiated via CLI interface
+- ${dateStr} ${timeStr}: Issue detected${options.automated ? ' by automated monitoring' : ''}
 
 **Rollback Execution:**
-- ${timestamp}: Rollback process started (Session: ${sessionId})
-${targetCommit !== 'Unknown' ? `- ${timestamp}: Rolling back to commit ${targetCommit}` : ''}
-${backupId ? `- ${timestamp}: Using backup ${backupId}` : ''}
-- ${timestamp}: ${success ? 'Rollback completed successfully' : 'Rollback encountered issues'}
+- ${dateStr} ${timeStr}: Rollback initiated
+- <!-- When was rollback completed -->
 
 **Resolution:**
-- ${timestamp}: ${success ? 'System restored to stable state' : 'Resolution in progress'}
+- <!-- When was normal service restored -->
 
 ### Root Cause Analysis
-${reason.includes('initialization') ? 
-  'Claude Flow initialization process encountered issues requiring rollback to previous stable state.' :
-  'Manual rollback was requested due to: ' + reason
-}
+<!-- What caused the original failure that required rollback -->
 
 **Contributing Factors:**
-- ${type === 'Manual Rollback' ? 'Manual intervention required' : 'Automated rollback triggered'}
-${errors.length > 0 ? '- Errors encountered: ' + errors.slice(0, 3).join(', ') : ''}
-${warnings.length > 0 ? '- Warnings detected: ' + warnings.slice(0, 3).join(', ') : ''}
+- ${reason}
 
 **Failure Points:**
-${phase ? `- Initialization phase: ${phase}` : '- System operation requiring rollback'}
-${errors.length > 0 ? '- Error conditions detected during operation' : '- No specific failure points identified'}
+- <!-- Identify where systems failed to prevent this -->
 
 ### Resolution Actions
+<!-- What was done to resolve the incident -->
 
-- [x] ${type.includes('Automated') ? 'Automated' : 'Manual'} rollback executed ${success ? 'successfully' : 'with issues'}
-- [${type === 'Manual Rollback' ? 'x' : ' '}] Manual intervention required
-- [${backupId ? 'x' : ' '}] Backup restoration performed
-- [x] Configuration restored
-- [x] State tracking updated
+- [ ] Automated rollback executed successfully
+- [ ] Manual intervention required
+- [ ] Database rollback performed
+- [ ] Configuration restored
+- [ ] Monitoring alerts configured
 
 ### Prevention Measures
+<!-- What will be done to prevent similar incidents -->
 
 **Immediate Actions:**
-- [x] System rolled back to known stable state
-${backupId ? '- [x] Backup verification completed' : ''}
-- [x] Incident tracking initiated
+- [ ] <!-- Immediate steps taken -->
 
 **Long-term Improvements:**
-- [ ] Review initialization process reliability
-- [ ] Enhance rollback system robustness  
-- [ ] Improve error handling and recovery
+- [ ] <!-- Process/system improvements -->
 
 ### Lessons Learned
+<!-- Key takeaways from this incident -->
 
-1. ${success ? 'Rollback system operated successfully' : 'Rollback system needs improvement'}
-2. ${backupId ? 'Backup system provided reliable recovery point' : 'State tracking enabled rollback process'}
-3. ${errors.length === 0 ? 'No critical errors encountered' : 'Error handling needs attention: ' + errors.slice(0, 2).join(', ')}
+1. <!-- Lesson 1 -->
+2. <!-- Lesson 2 -->
+3. <!-- Lesson 3 -->
 
 ### Follow-up Actions
+<!-- Actions to be taken after incident resolution -->
 
-- [x] Rollback procedures documented
-- [x] System state verified
-- [ ] Root cause investigation
-- [ ] Process improvements identified
-- [ ] Team notification completed
+- [ ] Update rollback procedures
+- [ ] Improve monitoring/alerting
+- [ ] Enhance testing procedures
+- [ ] Update documentation
+- [ ] Team training/communication
 
 ### Stakeholder Communication
+<!-- How stakeholders were informed -->
 
-- [x] Local system user notified
-- [ ] Team notified (if applicable)
-- [ ] Management informed (if high severity)
+- [ ] Team notified
+- [ ] Management informed
 - [ ] Users communicated (if applicable)
-- [ ] Post-mortem scheduled (if needed)
+- [ ] Post-mortem scheduled
 
 ---
 
 **Additional Notes:**
-This rollback was executed via the Claude Flow CLI rollback system. ${success ? 'The operation completed successfully.' : 'Issues were encountered during the operation.'}
 
-${actions.length > 0 ? `
-
-**Actions Performed:**
-${actions.map(action => `- ${action}`).join('\n')}` : ''}
-
-${errors.length > 0 ? `
-
-**Errors Encountered:**
-${errors.map(error => `- ${error}`).join('\n')}` : ''}
-
-${warnings.length > 0 ? `
-
-**Warnings:**
-${warnings.map(warning => `- ${warning}`).join('\n')}` : ''}
+${options.notes || 'Local rollback incident report generated by claude-flow rollback system.'}
 
 **Related Issues/PRs:**
-- CLI rollback operation
-- Session: ${sessionId}
+<!-- Link related issues or pull requests -->
 
 **Rollback Artifacts:**
-- Session data: Available in ${this.reportsDir}
-- State tracking: Updated in Claude Flow state files
-- Backup data: ${backupId || 'State-based rollback'}`;
+- Report ID: ${sessionId}
+- Report generated: ${timestamp}
+- Working directory: ${this.workingDir}
+`;
   }
 
   /**
-   * Ensure reports directory exists
-   */
-  async ensureReportsDir() {
-    const { mkdir } = await import('fs/promises');
-    
-    try {
-      await mkdir(this.reportsDir, { recursive: true });
-    } catch (error) {
-      if (error.code !== 'EEXIST') {
-        throw error;
-      }
-    }
-  }
-
-  /**
-   * List existing incident reports
+   * List incident reports
    */
   async listIncidentReports() {
     const result = {
@@ -246,19 +212,22 @@ ${warnings.map(warning => `- ${warning}`).join('\n')}` : ''}
     };
 
     try {
-      const { readdir } = await import('fs/promises');
-      
       await this.ensureReportsDir();
-      const files = await readdir(this.reportsDir);
-      
-      result.reports = files
-        .filter(file => file.startsWith('rollback-incident-') && file.endsWith('.md'))
-        .map(file => ({
-          filename: file,
-          sessionId: file.replace('rollback-incident-', '').replace('.md', ''),
-          path: join(this.reportsDir, file)
-        }));
 
+      const files = await fs.readdir(this.reportsDir);
+      const reportFiles = files.filter(f => f.endsWith('.json'));
+
+      for (const file of reportFiles) {
+        try {
+          const content = await fs.readFile(`${this.reportsDir}/${file}`, 'utf8');
+          const metadata = JSON.parse(content);
+          result.reports.push(metadata);
+        } catch (error) {
+          result.errors.push(`Failed to read report ${file}: ${error.message}`);
+        }
+      }
+
+      result.reports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     } catch (error) {
       result.success = false;
       result.errors.push(`Failed to list incident reports: ${error.message}`);
@@ -268,47 +237,76 @@ ${warnings.map(warning => `- ${warning}`).join('\n')}` : ''}
   }
 
   /**
-   * Clean up old incident reports
+   * Get a specific incident report
    */
-  async cleanupOldReports(keepCount = 10) {
+  async getIncidentReport(reportId) {
     const result = {
       success: true,
-      cleaned: [],
+      report: null,
+      metadata: null,
       errors: [],
     };
 
     try {
-      const reports = await this.listIncidentReports();
-      if (!reports.success) {
-        result.errors.push(...reports.errors);
-        result.success = false;
-        return result;
-      }
 
-      // Sort by creation time (newest first) and remove old ones
-      const sortedReports = reports.reports
-        .sort((a, b) => b.sessionId.localeCompare(a.sessionId))
-        .slice(keepCount);
+      const metadataPath = `${this.reportsDir}/${reportId}.json`;
+      const reportPath = `${this.reportsDir}/${reportId}.md`;
 
-      const { unlink } = await import('fs/promises');
-      
-      for (const report of sortedReports) {
-        try {
-          await unlink(report.path);
-          // Also remove corresponding JSON file
-          const jsonPath = report.path.replace('.md', '.json');
-          await unlink(jsonPath).catch(() => {}); // Ignore if doesn't exist
-          result.cleaned.push(report.filename);
-        } catch (error) {
-          result.errors.push(`Failed to delete ${report.filename}: ${error.message}`);
-        }
-      }
+      // Read metadata
+      const metadataContent = await fs.readFile(metadataPath, 'utf8');
+      result.metadata = JSON.parse(metadataContent);
 
+      // Read report
+      result.report = await fs.readFile(reportPath, 'utf8');
     } catch (error) {
       result.success = false;
-      result.errors.push(`Failed to cleanup incident reports: ${error.message}`);
+      result.errors.push(`Failed to get incident report: ${error.message}`);
     }
 
     return result;
+  }
+
+  /**
+   * Create GitHub issue from incident report
+   */
+  async createGitHubIssue(reportId, options = {}) {
+    const result = {
+      success: true,
+      issueUrl: null,
+      errors: [],
+      warnings: [],
+    };
+
+    try {
+      const reportData = await this.getIncidentReport(reportId);
+      if (!reportData.success) {
+        result.success = false;
+        result.errors.push(...reportData.errors);
+        return result;
+      }
+
+      // This would require GitHub API integration
+      // For now, just provide instructions
+      result.warnings.push('GitHub issue creation requires manual action or GitHub API setup');
+      result.warnings.push(`Use the rollback incident template with report ID: ${reportId}`);
+      result.warnings.push(`Report content available at: ${this.reportsDir}/${reportId}.md`);
+    } catch (error) {
+      result.success = false;
+      result.errors.push(`Failed to create GitHub issue: ${error.message}`);
+    }
+
+    return result;
+  }
+
+  // Helper methods
+
+  async ensureReportsDir() {
+    try {
+      await fs.mkdir(this.reportsDir, { recursive: true });
+    } catch (error) {
+      if (error.code !== 'EEXIST') {
+        throw error;
+      }
+    }
   }
 }
