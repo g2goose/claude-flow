@@ -1,0 +1,301 @@
+// incident-reporter.js - Generate rollback incident reports
+
+import { promises as fs } from 'fs';
+
+export class IncidentReporter {
+  constructor(workingDir) {
+    this.workingDir = workingDir;
+    this.reportsDir = `${workingDir}/.claude-flow-incidents`;
+  }
+
+  /**
+   * Generate a rollback incident report
+   */
+  async generateIncidentReport(rollbackData, options = {}) {
+    const result = {
+      success: true,
+      reportId: null,
+      reportPath: null,
+      errors: [],
+    };
+
+    try {
+      await this.ensureReportsDir();
+
+      const timestamp = new Date().toISOString();
+      const reportId = `incident-${timestamp.replace(/[:.TZ]/g, '-')}`;
+      result.reportId = reportId;
+
+      const reportPath = `${this.reportsDir}/${reportId}.md`;
+      result.reportPath = reportPath;
+
+      const report = await this.formatIncidentReport(rollbackData, timestamp, options);
+      await fs.writeFile(reportPath, report, 'utf8');
+
+      // Also create JSON metadata
+      const metadata = {
+        id: reportId,
+        timestamp,
+        type: 'rollback_incident',
+        severity: rollbackData.severity || 'Medium',
+        status: rollbackData.status || 'investigating',
+        rollbackSessionId: rollbackData.sessionId,
+        sourceCommit: rollbackData.sourceCommit,
+        targetCommit: rollbackData.targetCommit,
+        reason: rollbackData.reason,
+      };
+
+      await fs.writeFile(
+        `${this.reportsDir}/${reportId}.json`,
+        JSON.stringify(metadata, null, 2),
+        'utf8'
+      );
+
+      console.log(`📋 Incident report generated: ${reportPath}`);
+    } catch (error) {
+      result.success = false;
+      result.errors.push(`Failed to generate incident report: ${error.message}`);
+    }
+
+    return result;
+  }
+
+  /**
+   * Format the incident report using the template structure
+   */
+  async formatIncidentReport(data, timestamp, options = {}) {
+    const {
+      incidentType = 'Manual Rollback',
+      severity = 'Medium',
+      status = 'Investigating',
+      sessionId = 'manual',
+      sourceCommit = 'unknown',
+      targetCommit = 'unknown',
+      reason = 'Manual rollback requested',
+      userImpact = 'Unknown',
+      duration = 'Unknown',
+      components = ['Application'],
+    } = data;
+
+    const timeStr = timestamp.split('T')[1].split('.')[0];
+    const dateStr = timestamp.split('T')[0];
+
+    return `# 🔄 Rollback Incident Report
+
+**Generated:** ${timestamp}  
+**Report ID:** ${sessionId}  
+
+## 🔄 Rollback Incident Details
+
+### Incident Summary
+- **Incident Type:** ${incidentType}
+- **Severity:** ${severity}
+- **Status:** ${status}
+- **Detected At:** ${dateStr} ${timeStr} UTC
+
+### Rollback Information
+- **Rollback Session ID:** ${sessionId}
+- **Source Commit:** ${sourceCommit}
+- **Target Commit:** ${targetCommit}
+- **Rollback Reason:** ${reason}
+
+### Impact Assessment
+- [ ] Production services affected
+- [ ] User-facing functionality impacted
+- [ ] Data integrity concerns
+- [ ] Performance degradation
+- [ ] Security implications
+
+**Affected Components:**
+${components.map(c => `- ${c}`).join('\n')}
+
+**Estimated User Impact:**
+- **Users Affected:** ${userImpact}
+- **Duration:** ${duration}
+
+### Timeline
+<!-- Provide a timeline of events -->
+
+**Detection:**
+- ${dateStr} ${timeStr}: Issue detected${options.automated ? ' by automated monitoring' : ''}
+
+**Rollback Execution:**
+- ${dateStr} ${timeStr}: Rollback initiated
+- <!-- When was rollback completed -->
+
+**Resolution:**
+- <!-- When was normal service restored -->
+
+### Root Cause Analysis
+<!-- What caused the original failure that required rollback -->
+
+**Contributing Factors:**
+- ${reason}
+
+**Failure Points:**
+- <!-- Identify where systems failed to prevent this -->
+
+### Resolution Actions
+<!-- What was done to resolve the incident -->
+
+- [ ] Automated rollback executed successfully
+- [ ] Manual intervention required
+- [ ] Database rollback performed
+- [ ] Configuration restored
+- [ ] Monitoring alerts configured
+
+### Prevention Measures
+<!-- What will be done to prevent similar incidents -->
+
+**Immediate Actions:**
+- [ ] <!-- Immediate steps taken -->
+
+**Long-term Improvements:**
+- [ ] <!-- Process/system improvements -->
+
+### Lessons Learned
+<!-- Key takeaways from this incident -->
+
+1. <!-- Lesson 1 -->
+2. <!-- Lesson 2 -->
+3. <!-- Lesson 3 -->
+
+### Follow-up Actions
+<!-- Actions to be taken after incident resolution -->
+
+- [ ] Update rollback procedures
+- [ ] Improve monitoring/alerting
+- [ ] Enhance testing procedures
+- [ ] Update documentation
+- [ ] Team training/communication
+
+### Stakeholder Communication
+<!-- How stakeholders were informed -->
+
+- [ ] Team notified
+- [ ] Management informed
+- [ ] Users communicated (if applicable)
+- [ ] Post-mortem scheduled
+
+---
+
+**Additional Notes:**
+${options.notes || 'Local rollback incident report generated by claude-flow rollback system.'}
+
+**Related Issues/PRs:**
+<!-- Link related issues or pull requests -->
+
+**Rollback Artifacts:**
+- Report ID: ${sessionId}
+- Report generated: ${timestamp}
+- Working directory: ${this.workingDir}
+`;
+  }
+
+  /**
+   * List incident reports
+   */
+  async listIncidentReports() {
+    const result = {
+      success: true,
+      reports: [],
+      errors: [],
+    };
+
+    try {
+      await this.ensureReportsDir();
+
+      const files = await fs.readdir(this.reportsDir);
+      const reportFiles = files.filter(f => f.endsWith('.json'));
+
+      for (const file of reportFiles) {
+        try {
+          const content = await fs.readFile(`${this.reportsDir}/${file}`, 'utf8');
+          const metadata = JSON.parse(content);
+          result.reports.push(metadata);
+        } catch (error) {
+          result.errors.push(`Failed to read report ${file}: ${error.message}`);
+        }
+      }
+
+      result.reports.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    } catch (error) {
+      result.success = false;
+      result.errors.push(`Failed to list incident reports: ${error.message}`);
+    }
+
+    return result;
+  }
+
+  /**
+   * Get a specific incident report
+   */
+  async getIncidentReport(reportId) {
+    const result = {
+      success: true,
+      report: null,
+      metadata: null,
+      errors: [],
+    };
+
+    try {
+      const metadataPath = `${this.reportsDir}/${reportId}.json`;
+      const reportPath = `${this.reportsDir}/${reportId}.md`;
+
+      // Read metadata
+      const metadataContent = await fs.readFile(metadataPath, 'utf8');
+      result.metadata = JSON.parse(metadataContent);
+
+      // Read report
+      result.report = await fs.readFile(reportPath, 'utf8');
+    } catch (error) {
+      result.success = false;
+      result.errors.push(`Failed to get incident report: ${error.message}`);
+    }
+
+    return result;
+  }
+
+  /**
+   * Create GitHub issue from incident report
+   */
+  async createGitHubIssue(reportId, options = {}) {
+    const result = {
+      success: true,
+      issueUrl: null,
+      errors: [],
+      warnings: [],
+    };
+
+    try {
+      const reportData = await this.getIncidentReport(reportId);
+      if (!reportData.success) {
+        result.success = false;
+        result.errors.push(...reportData.errors);
+        return result;
+      }
+
+      // This would require GitHub API integration
+      // For now, just provide instructions
+      result.warnings.push('GitHub issue creation requires manual action or GitHub API setup');
+      result.warnings.push(`Use the rollback incident template with report ID: ${reportId}`);
+      result.warnings.push(`Report content available at: ${this.reportsDir}/${reportId}.md`);
+    } catch (error) {
+      result.success = false;
+      result.errors.push(`Failed to create GitHub issue: ${error.message}`);
+    }
+
+    return result;
+  }
+  // Helper methods
+
+  async ensureReportsDir() {
+    try {
+      await fs.mkdir(this.reportsDir, { recursive: true });
+    } catch (error) {
+      if (error.code !== 'EEXIST') {
+        throw error;
+      }
+    }
+  }
+}
