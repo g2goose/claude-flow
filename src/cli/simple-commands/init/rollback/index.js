@@ -150,24 +150,7 @@ export class RollbackSystem {
         printError('Full rollback failed');
 
         // Generate incident report for failed rollback
-        try {
-          const incidentData = {
-            type: 'Rollback Failure',
-            severity: 'High',
-            reason: 'Full rollback failed during execution',
-            targetCommit: targetBackup,
-            backupId: targetBackup,
-            scope: 'full',
-            success: false,
-            errors: rollbackResult.errors,
-            warnings: rollbackResult.warnings,
-            actions: rollbackResult.actions
-          };
-
-          await this.incidentReporter.generateRollbackIncidentReport(incidentData);
-        } catch (error) {
-          printWarning(`Failed to generate failure incident report: ${error.message}`);
-        }
+        await this._reportFailedRollbackIncident(targetBackup, 'full', rollbackResult);
       }
     } catch (error) {
       result.success = false;
