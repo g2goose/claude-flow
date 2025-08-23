@@ -37,7 +37,7 @@ export class IncidentReporter {
         id: reportId,
         timestamp,
         type: 'rollback_incident',
-        severity: rollbackData.severity || 'medium',
+        severity: rollbackData.severity || 'Medium',
         status: rollbackData.status || 'investigating',
         rollbackSessionId: rollbackData.sessionId,
         sourceCommit: rollbackData.sourceCommit,
