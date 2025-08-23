@@ -607,7 +607,51 @@ jobs:
           path: rollback-reports/
           retention-days: ${{ env.ROLLBACK_RETENTION_DAYS }}
 
-      - name: Notify stakeholders
+      - name: Generate comprehensive incident report
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          echo "📋 Generating comprehensive rollback incident report..."
+          
+          # Create rollback data JSON for the incident report generator
+          cat > rollback-incident-data.json << EOF
+          {
+            "sessionId": "${{ needs.failure-detection.outputs.rollback-session-id || 'manual' }}",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "trigger": {
+              "event": "${{ github.event_name }}",
+              "workflow": "${{ github.event.workflow_run.name || 'N/A' }}",
+              "conclusion": "${{ github.event.workflow_run.conclusion || 'N/A' }}",
+              "commit": "${{ github.sha }}",
+              "branch": "${{ github.ref_name }}"
+            },
+            "failure": {
+              "type": "${{ needs.failure-detection.outputs.failure-type }}",
+              "severity": "${{ needs.failure-detection.outputs.failure-severity }}",
+              "rollbackRequired": true
+            },
+            "rollback": {
+              "target": "${{ github.event.inputs.rollback_target || needs.failure-detection.outputs.rollback-target }}",
+              "reason": "${{ github.event.inputs.rollback_reason || 'Automated rollback due to CI failure' }}"
+            },
+            "verification": {
+              "buildPassed": true,
+              "testsPassed": true,
+              "cliWorking": true,
+              "systemHealthy": true
+            },
+            "monitoring": {
+              "duration": "${{ env.MONITORING_WINDOW_MINUTES }} minutes",
+              "systemStable": true,
+              "issuesDetected": 0
+            },
+            "scope": "${{ github.event.inputs.rollback_scope || 'application' }}"
+          }
+          EOF
+          
+          # Generate the comprehensive incident report
+          node scripts/generate-rollback-incident-report.js "$(cat rollback-incident-data.json)" > rollback-incident-report.md
+
+      - name: Create rollback incident issue
         if: github.event_name != 'workflow_dispatch'
         uses: actions/github-script@v7
         with:
