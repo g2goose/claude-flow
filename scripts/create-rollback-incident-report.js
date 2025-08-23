@@ -101,9 +101,9 @@ async function main() {
     
     console.log(`✅ Incident report generated: ${filename}`);
     console.log('\n📄 Report preview:');
-    console.log('=' * 50);
+    console.log('='.repeat(50));
     console.log(report.substring(0, 500) + '...');
-    console.log('=' * 50);
+    console.log('='.repeat(50));
     
     console.log('\n🔗 To create a GitHub issue with this report:');
     console.log(`1. Go to: https://github.com/YOUR_ORG/YOUR_REPO/issues/new?template=rollback-incident.md`);
