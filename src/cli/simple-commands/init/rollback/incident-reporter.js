@@ -23,7 +23,7 @@ export class IncidentReporter {
       await this.ensureReportsDir();
 
       const timestamp = new Date().toISOString();
-      const reportId = `incident-${timestamp.replace(/[:.]/g, '-')}`;
+      const reportId = `incident-${timestamp.replace(/[:.TZ]/g, '-')}`;
       result.reportId = reportId;
 
       const reportPath = `${this.reportsDir}/${reportId}.md`;
