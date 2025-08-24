@@ -167,6 +167,8 @@ done
 
 ---
 
-*Last Updated: ${new Date().toISOString()}*
+*Last Updated: 2025-08-23*
 
 This assets directory contains the visual and media resources that support Claude Flow's documentation, user interface, and brand identity.
+
+*Last Updated: 2025-08-23*

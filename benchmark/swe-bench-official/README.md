@@ -73,3 +73,5 @@ swe-bench-official/
 ├── predictions/              # Generated predictions
 └── logs/                     # Execution logs
 ```
+
+*Last Updated: 2025-08-23*

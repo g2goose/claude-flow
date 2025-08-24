@@ -97,3 +97,5 @@ curl -X DELETE http://localhost:3000/api/items/1
 - Data is stored in memory and will be lost when the server restarts
 - No authentication or authorization is implemented
 - This is a demonstration API for learning purposes
+
+*Last Updated: 2025-08-23*

@@ -72,3 +72,5 @@ The original comprehensive configuration example showing all available options:
 - `level`: Detail level ("debug", "info", "warn", "error")
 - `format`: Output format ("json", "text", "pretty")
 - `destination`: Where logs go ("console", "file", "both")
+
+*Last Updated: 2025-08-23*

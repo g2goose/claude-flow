@@ -323,8 +323,8 @@ Task("Production validation", "...", "production-validator")
 - Apply `collective-intelligence-coordinator` for decision-making
 
 For more information about SPARC methodology and batchtools optimization, see: 
-- SPARC Guide: https://github.com/ruvnet/claude-code-flow/docs/sparc.md
-- Batchtools Documentation: https://github.com/ruvnet/claude-code-flow/docs/batchtools.md
+- SPARC Guide: https://github.com/g2goose/claude-flow/docs/sparc.md
+- Batchtools Documentation: https://github.com/g2goose/claude-flow/docs/batchtools.md
 
 # important-instruction-reminders
 Message 3: Task("Agent 2")

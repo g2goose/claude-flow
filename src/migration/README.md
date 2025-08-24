@@ -450,7 +450,7 @@ Typical performance metrics:
 
 ```bash
 # Clone and setup
-git clone https://github.com/ruvnet/claude-code-flow
+git clone https://github.com/g2goose/claude-flow
 cd claude-code-flow
 npm install
 
@@ -495,3 +495,5 @@ This migration system is part of claude-code-flow and follows the same license t
 ---
 
 For more information, see the [main claude-code-flow documentation](../../README.md).
+
+*Last Updated: 2025-08-23*

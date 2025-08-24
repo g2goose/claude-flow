@@ -437,3 +437,5 @@ Detailed API documentation is available in the [API docs](./docs/api.md).
 ## Contributing
 
 See [CONTRIBUTING.md](../../CONTRIBUTING.md) for guidelines on contributing to the task management system.
+
+*Last Updated: 2025-08-23*

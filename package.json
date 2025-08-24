@@ -67,6 +67,8 @@
     "rollback:incident-report": "node scripts/create-rollback-incident-report.js",
     "rollback:generate-report": "node scripts/generate-rollback-incident-report.js",
     "rollback:test-incident": "node scripts/test-incident-reporting.js",
+    "update-docs": "node scripts/update-documentation.js",
+    "validate-docs": "node scripts/validate-documentation.js",
     "start": "node server.js"
   },
   "keywords": [

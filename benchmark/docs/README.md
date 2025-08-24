@@ -77,3 +77,5 @@ We welcome contributions! See our [Contributing Guide](contributing.md) for deta
 ---
 
 © 2024 Claude Flow Team | [License](../LICENSE) | [Code of Conduct](code-of-conduct.md)
+
+*Last Updated: 2025-08-23*

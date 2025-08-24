@@ -78,3 +78,5 @@ Required environment variables:
 ### test
 - Automated test runner
 - CI-friendly configuration
+
+*Last Updated: 2025-08-23*

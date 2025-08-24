@@ -292,3 +292,5 @@ For issues or questions:
 ---
 
 **Note**: This Docker environment is optimized for testing claude-code-flow and ruv-swarm integration. For production deployments, review security configurations and resource limits.
+
+*Last Updated: 2025-08-23*

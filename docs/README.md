@@ -1,6 +1,6 @@
 # 📚 Claude-Flow Documentation
 
-Welcome to the Claude-Flow documentation! This directory contains comprehensive guides and references for using Claude-Flow v2.0.0-alpha.88.
+Welcome to the Claude-Flow documentation! This directory contains comprehensive guides and references for using Claude-Flow v2.0.0-alpha.90.
 
 ## 📖 Documentation Structure
 
@@ -26,10 +26,10 @@ Welcome to the Claude-Flow documentation! This directory contains comprehensive 
 
 ## 📞 Support
 
-- **GitHub Issues**: https://github.com/ruvnet/claude-flow/issues
+- **GitHub Issues**: https://github.com/g2goose/claude-flow/issues
 - **Discord**: Join our community for real-time help
 - **Documentation Updates**: PRs welcome!
 
 ---
 
-*Last Updated: January 2025 | Version: 2.0.0-alpha.88*
+*Last Updated: 2025-08-23 | Version: 2.0.0-alpha.90*

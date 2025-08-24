@@ -254,3 +254,5 @@ window.claudeConsole.wsClient.debugMode = true;
 ## License
 
 Part of the Claude Code project. See main project LICENSE for details.
+
+*Last Updated: 2025-08-23*

@@ -107,3 +107,5 @@ npx claude-flow orchestrate ./claude-workflow.json --background
 3. Set up dependencies between tasks
 4. Configure parallel execution where possible
 5. Add quality thresholds and validation steps
+
+*Last Updated: 2025-08-23*

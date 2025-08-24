@@ -233,3 +233,5 @@ To add new examples:
 2. Run real examples for production insights
 3. Use CLI examples for automation
 4. Customize advanced examples for specific needs
+
+*Last Updated: 2025-08-23*

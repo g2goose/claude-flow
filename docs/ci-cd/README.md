@@ -268,10 +268,10 @@ For detailed information about the rollback incident system, see [Rollback Incid
 Dynamic status badges that update based on workflow results:
 
 ```markdown
-[![Verification Pipeline](https://img.shields.io/github/actions/workflow/status/ruvnet/claude-code-flow/verification-pipeline.yml?branch=main&label=verification&style=flat-square)](https://github.com/ruvnet/claude-code-flow/actions/workflows/verification-pipeline.yml)
-[![Truth Scoring](https://img.shields.io/github/actions/workflow/status/ruvnet/claude-code-flow/truth-scoring.yml?branch=main&label=truth%20score&style=flat-square)](https://github.com/ruvnet/claude-code-flow/actions/workflows/truth-scoring.yml)
-[![Integration Tests](https://img.shields.io/github/actions/workflow/status/ruvnet/claude-code-flow/integration-tests.yml?branch=main&label=integration&style=flat-square)](https://github.com/ruvnet/claude-code-flow/actions/workflows/integration-tests.yml)
-[![Rollback Manager](https://img.shields.io/github/actions/workflow/status/ruvnet/claude-code-flow/rollback-manager.yml?branch=main&label=rollback&style=flat-square)](https://github.com/ruvnet/claude-code-flow/actions/workflows/rollback-manager.yml)
+[![Verification Pipeline](https://img.shields.io/github/actions/workflow/status/g2goose/claude-flow/verification-pipeline.yml?branch=main&label=verification&style=flat-square)](https://github.com/g2goose/claude-flow/actions/workflows/verification-pipeline.yml)
+[![Truth Scoring](https://img.shields.io/github/actions/workflow/status/g2goose/claude-flow/truth-scoring.yml?branch=main&label=truth%20score&style=flat-square)](https://github.com/g2goose/claude-flow/actions/workflows/truth-scoring.yml)
+[![Integration Tests](https://img.shields.io/github/actions/workflow/status/g2goose/claude-flow/integration-tests.yml?branch=main&label=integration&style=flat-square)](https://github.com/g2goose/claude-flow/actions/workflows/integration-tests.yml)
+[![Rollback Manager](https://img.shields.io/github/actions/workflow/status/g2goose/claude-flow/rollback-manager.yml?branch=main&label=rollback&style=flat-square)](https://github.com/g2goose/claude-flow/actions/workflows/rollback-manager.yml)
 ```
 
 ## ⚙️ Configuration Files
@@ -370,7 +370,7 @@ When updating workflows:
 ## 📚 Additional Resources
 
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
-- [Claude Flow Wiki](https://github.com/ruvnet/claude-code-flow/wiki)
+- [Claude Flow Wiki](https://github.com/g2goose/claude-flow/wiki)
 - [Agent System Documentation](../agent-system-documentation.md)
 - [Performance Benchmarking](../reports/PERFORMANCE_METRICS_VALIDATION_REPORT.md)
 

@@ -1,0 +1,12 @@
+{
+  "version": "2.0.0-alpha.90",
+  "updateDate": "2025-08-23",
+  "totalMarkdownFiles": 277,
+  "readmeFiles": 82,
+  "directories": {
+    "docs": true,
+    "examples": true,
+    "archive": true,
+    "src": true
+  }
+}

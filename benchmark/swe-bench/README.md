@@ -81,3 +81,5 @@ Results are tracked in:
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding new benchmarks or improving existing ones.
+
+*Last Updated: 2025-08-23*

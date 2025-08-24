@@ -14,3 +14,5 @@ create an authentication service with JWT tokens and user registration in ./exam
 ```bash
 npm start
 ```
+
+*Last Updated: 2025-08-23*
